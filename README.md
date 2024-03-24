@@ -75,3 +75,10 @@ A compilation of all math, physics, or computer science course work that I have 
 - PHYS 617 - Statistical Physics
 - PHYS 660 - Quantum Mechanics I
 - CS 592/MA 595 - Introduction to Quantum Computing
+
+## Fall 2024
+- PHYS 630 - Advanced Electricity and Magnetism I
+- PHYS 661 - Quantum Mechanics II
+- PHYS 662 - Quantum Field Theory I
+- MA 562 - Introduction to Differential Geometry and Topology
+- MA 571 - Topology
