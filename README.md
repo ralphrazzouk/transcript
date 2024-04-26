@@ -82,11 +82,11 @@ A compilation of all math, physics, or computer science course work that I have 
 
 ## Spring 2024
 
--   ASTR 562 - Introduction to High-Energy Astrophysics [[Folder](https://github.com/ralphrazzouk/transcript/phd/Year 1 Spring/ASTR 562)]
--   PHYS 601 - Methods of Theoretical Physics II [[Folder](https://github.com/ralphrazzouk/transcript/phd/Year 1 Spring/PHYS 601)]
--   PHYS 617 - Statistical Physics [[Folder](https://github.com/ralphrazzouk/transcript/phd/Year 1 Spring/PHYS S617)]
--   PHYS 660 - Quantum Mechanics I [[Folder](https://github.com/ralphrazzouk/transcript/phd/Year 1 Spring/PHYS 660)]
--   CS 592/MA 595 - Introduction to Quantum Computing [[Folder](https://github.com/ralphrazzouk/transcript/phd/Year 1 Spring/MA 595)]
+-   ASTR 562 - Introduction to High-Energy Astrophysics [[Folder](https://github.com/ralphrazzouk/transcript/phd/y1/spring/ASTR562)]
+-   PHYS 601 - Methods of Theoretical Physics II [[Folder](https://github.com/ralphrazzouk/transcript/phd/y1/spring/PHYS601)]
+-   PHYS 617 - Statistical Physics [[Folder](https://github.com/ralphrazzouk/transcript/phd/y1/spring/PHYS617)]
+-   PHYS 660 - Quantum Mechanics I [[Folder](https://github.com/ralphrazzouk/transcript/phd/y1/spring/PHYS660)]
+-   CS 592/MA 595 - Introduction to Quantum Computing [[Folder](https://github.com/ralphrazzouk/transcript/phd/y1/spring/MA595)]
 
 ## Fall 2024
 
