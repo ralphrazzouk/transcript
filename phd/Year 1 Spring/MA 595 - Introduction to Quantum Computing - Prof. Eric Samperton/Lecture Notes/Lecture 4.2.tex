@@ -1,0 +1,150 @@
+\documentclass{article}
+
+\usepackage{mathptmx,fullpage}
+\usepackage{amssymb,amsmath,amsthm}
+\usepackage{framed}
+\usepackage{graphicx}
+
+\newtheorem{thm}{Theorem}
+\newtheorem*{dfn}{Definition}
+\newtheorem{cor}[thm]{Corollary}
+\newtheorem{lem}[thm]{Lemma}
+\newtheorem*{note}{Note}
+\newtheorem*{remark}{Remark}
+
+
+\newcommand{\ket}[1]{|#1\rangle}
+\newcommand{\bra}[1]{\langle#1|}
+\newcommand{\braket}[2]{\langle#1|#2\rangle}
+\newcommand{\norm}[1]{\left\lVert #1 \right\rVert}
+\newcommand{\bbC}{\mathbb{C}}
+\newcommand{\calG}{\mathcal{G}}
+\newcommand{\qbit}{\bbC^2}
+\newcommand{\qbits}[1]{(\qbit)^{\otimes #1}}
+
+\DeclareMathOperator{\poly}{poly}
+
+\begin{document}
+
+\noindent
+\fbox{
+	\parbox{\linewidth}{
+		\vspace{-.3cm}
+{\bf \Large \begin{center}
+CS 593/MA 592 - Intro to Quantum Computing \\
+Spring 2024 \\
+Thursday, February 1 - Lecture 4.2
+\end{center}}
+Today's scribe: Anirudh Rao 
+	}
+}
+
+\vspace{.3cm}
+
+\noindent {\bf Reading:} Subsections 4.5, 4.6 and Appendix 3 of Nielsen and Chuang. 
+
+\
+
+\noindent{\bf Agenda:}
+\begin{enumerate}
+     \item Counting Circuits
+     \item BQP \& Solovay-Kitaev
+\end{enumerate}
+
+\section{Counting Circuits}
+Fix a gate set \(\calG\) and let \(|\calG| = c\).  Let's upper bound the number of different unitaries that we can build out of circuits on \(n\) qubits of length \(l\) (that is, using \(l\) gates).
+
+For convenience, let's assume all \(g \in \calG\) are \(k\)-ary. That is, \(g : (\bbC^2)^{\otimes k} \to (\bbC^2)^{\otimes k}\).  Let's furthermore assume that any time $g \in \calG$, we have that all gates we get from permuting the input/output wires for $g$ are also in $\calG$.  This means anytime we want to act with some gate on a choice of $k$ qubits, we might as well assume the qubits enter the gate in a way that respects the ordering of their indices.  Such circuits look like this (where any crossings of wires should be ignored):
+\begin{center}
+    \includegraphics[height=0.25\textwidth]{quantum-circuit.png}
+\end{center}
+Then clearly we can upper bound the number of such circuits by:
+\[ c \binom{n}{k} \cdot c \binom{n}{k} \cdot \dotsb \cdot c \binom{n}{k} = c^l \binom{n}{k}^l = O((nc)^{kl}). \]
+If our gate set doesn't satisfy the properties we imposed, then we can always make $\calG$ bigger to get it to.  Thus this upper bound works for all gate sets.
+
+However, simply counting the number of unitaries we can implement \emph{exactly} is not as interesting/pertinent as counting the number of unitaries we can \emph{approximately} implement for a given $\epsilon >0$.
+
+As a warm-up, let's consider the following: how big does \(l\) need to be for us to be able to guarantee that for any state $\ket{\psi} \in \qbits{n}$, we may build a circuit \(C\) so that \(|C \ket{0\dotsb0} - \ket{\psi}| < \epsilon\)? Assume \(\ket{\psi}\) is normalized. The set of all such states is the unit sphere \(S^{2^{n+1}-1} \subseteq (\bbC^2)^{\otimes n}\).
+\[ \left\{\left. \ket{\psi} = \sum_{l=0}^{2^n -1} z_l \ket{l} \right| \sum_{l=0}^{2^n -1} |z_l|^2 = 1 \right\} = S^{2^{n+1}-1} \]
+
+Our question reduces to the following: What is the minimum number of points on \(S^{2^{n+1}-1}\) required to guarantee that every point on \(S^{2^{n+1}-1}\) is within \(\epsilon\) of one of these points?
+\[ N \geq \frac{\text{Area}(S^{2^{n+1}-1})}{\text{Area}(\text{little, spherical disk \(D^{2^{n+1}-1}_{\epsilon}\) of radius \(\epsilon\)})} = \Omega\left(\left(\frac{1}{\epsilon}\right)^{2n}\right) \]
+Thus, we need circuits of length \(l = \Omega\left(\frac{2^n}{\log n} \log \left(\frac{1}{\epsilon}\right)\right)\) to guarantee there exists a circuit \(C\) with \(|C\ket{00\dotsb0} - \ket{\psi}| < \epsilon\) for every \(\ket{\psi}\).
+
+In particular, you can now easily argue that that for all \( \epsilon > 0 \), there exists a unitary \(U : (\bbC^2)^{\otimes n} \to (\bbC^2)^{\otimes n}\) such that the smallest circuit \(C\) that satisfies \(\operatorname{Error}(C, U) < \epsilon\) has length \(\Omega\left(\frac{2^n}{\log n} \log \left(\frac{1}{\epsilon}\right)\right)\).
+
+\section{BQP \& Solovay-Kitaev}
+BQP is notation for the complexity class ``Bounded error Quantum Polynomial time."
+BQP is a complexity class of decision problems (a.k.a. ``yes-no questions") \[L : \{0,1\}^* = \bigcup_{l \ge 0} \{0,1\}^l \to \{0,1\} = \{\text{NO}, \text{YES}\}.\]
+A priori, BQP depends on two parameters: some number \(0 \leq \delta \leq 1\) and a gate set \(\calG\).
+
+\begin{dfn}
+	\(L \in \operatorname{BQP}(\calG, \delta)\) if there exists a \textbf{classical (deterministic) polynomial-time algorithm} which for each bit string \(x \in \{0,1\}^n\) outputs a description of a \textbf{quantum circuit \(C_x\)} over $\calG$ such that measuring the first qubit of \(C_x\ket{0\cdots 0}\) in the computational basis satisfies \[prob(\operatorname{Output}(C_x) = L(x)) \ge 1 - \delta.\]
+\end{dfn}
+
+The \(1 - \delta\) is the ``bounded" part or the ``B" of BQP, the quantum circuit \(C_x\) is the ``quantum" part or the ``Q" of BQP, and the classical polynomial-time algorithm is the ``polynomial" part or the "P" of BQP.\footnote{In more etail: since it takes us at most a polynomial amount of classical thinking to decide which quantum calculation $C_x$ to do, then $C_x$ is at most polynomially large, and thus can be run on our quantum computer in a polynomial amount of time!} This is formalizing the following work flow:
+\begin{enumerate}
+    \item Given \(x\).
+    \item Think hard (but not too hard) about how to build a helpful quantum circuit \(C_x\). (classical part)
+    \item Use your quantum computer to apply \(C_x\) to \(\ket{0\dotsb0}\). (quantum part)
+    \item Reduce from ``quantum data" to ``classical data" (i.e. YES or NO) by measuring in the computational basis.
+\end{enumerate}
+
+If we don't insist that our circuits \(C_x\) are prepared algorithmically, then we might call the complexity class BQ($\calG,\delta$). But this is a bad class, because  BQ($\calG,\delta$) = ALL (assuming \(\calG\) is universal), where ALL is the complexity class consisting of all decision problems.  Of course, ALL contains uncomputable problems (in fact, it contains problems that are strictly harder than the halting problem!).  Thus, the insistence that our circuits are prepared algorithmically is important, and often described as a requirement of \emph{uniformity} in the quantum circuits we use to solve the problem $L$.
+
+One might wonder: what if we used a classical \emph{probabilitistic} algorithm to prepare the circuits $C_x$?  Well, we get the same class.  This is because we can put all of the classical randomness we might use to prepare $C_x$ into the quantum circuit we prepare.  (Assuming we have gates in $\calG$ that are able to implement classical coin flips.)  So we don't get anything new.
+
+If we insist \(C_x\) only depends on the length of the bit string
+\[|x| = |(x_1,\dots,x_l)| = l\]
+and we use \(\ket{x_1 \cdots x_l 0\cdots 0}\) as input instead of $\ket{0\dots00\dots0}$, then we also get the same class.
+
+However, if we drop the algorithmic assumption on \emph{finding} such a circuit that only depends on $|x|$, we get the class BQP/poly, or ``quantum polynomial time with classical advice."  While not equal to ALL, BQP/poly still contains uncomputable problems.
+
+What is \(\delta\) doing? BQP(\(\calG\), 0) is a more-or-less sensible complexity class of ``zero-sided error" quantum polynomial time algorithsm. However, the property of having zero-sided error is not stable if we change \(\calG\).  In particular, it is unreasonable to expect zero-sided error in a setting where we have to perform error correction.  In fact, it is unreasonable to expect one-sided error (on either side).
+
+On the other hand, for $\delta\ge 1/2$, BQP($\calG, \delta$) = ALL.
+You'll show this on your homework 4.
+
+So \(0 < \delta < \frac{1}{2}\) seems most appropriate.  In fact, once we're in this range, something nice happens:
+
+\begin{lem}
+    If \(0 < \delta \leq \delta' < \frac{1}{2}\) and $\calG$ is able to implement a ``majority" circuit of arbitrary width, then \(\operatorname{BQP}(\calG, \delta) = \operatorname{BQP}(\calG, \delta')\)
+\end{lem}
+
+\begin{proof}
+\(\operatorname{BQP}(\calG, \delta) \subseteq \operatorname{BQP}(\calG, \delta')\) is free.  To obtain the other containment, we need to  ``amplify the success probability."
+
+The basic idea is simple. Compute \(C_x\ket{0\dotsb0}\) several times, take a survey of all the output bits from each run, and then elect the majority. The Chernoff bound shows that this works.
+
+The technical thing to think through is how to implement this majority vote with a single quantum circuit.  Indeed, strictly speaking, our definition of BQP does not allow for any ``classical post-processing" of our measurements.  A circuit like this is close to doing the trick, but you should think about what details need to be modified to finish the argument:
+
+\begin{center}
+	\includegraphics[width=0.8\textwidth]{prettier.png}
+\end{center}
+
+\end{proof}
+
+The previous lemma shows that when $\calG$ is universal (really, ``universal enough to implement majority" suffices), the definition of $BQP(\calG,\delta)$ gives the same class for all $0 < \delta < 1/2$.  To resolve the question of dependency on the choice of gate set $\calG$, we will use the Solovay-Kitaev theorem.
+
+First, a definition.  The \emph{special unitary group} $SU(d)$ is the group of all $d \times d$ unitary matrices with determinant 1:
+\[SU(d) = \{U \in U(d) | \det U = 1\} \le U(d).\]
+The determinant 1 condition is kind of like saying unitaries with ``no global phase."\footnote{Note that $SU(d) \neq PU(d)$. Indeed, $PU(d)$ is the \emph{quotient} of $U(d)$ we get by identifying two matrices that differ by a global phase.} 
+
+\begin{thm}[
+	Solovay-Kitaev Theorem]
+
+Let \(\calG \subset SU(\alpha)\) be a finite subset of gates that is closed under inversion (\(g \in \calG \implies g^{-1} \in \calG\)) and densely generates. Then there exists a (classically efficient) algorithm that takes any "explicit" \(U \in SU(\alpha)\) and any \(\epsilon > 0\) to a word \(w = g_l g_{l-1} \dotsb g_2 g_1\), \(g_i \in \calG\) of length \(l = O(\log\left(\frac{1}{\epsilon}\right)^\alpha)\) for some constant \(\alpha > 1\) and \(\operatorname{Error}(w, U) < \epsilon\).
+
+\end{thm}
+
+The polynomial dependence on $\log(1/\epsilon)$ is actually not important for our next result, but it is important in the context of error correction and fault tolerance, since it says we get only polylogarithmic overhead in certain error corection procedures.
+
+\begin{cor}
+    Given \(0 < \delta < \frac{1}{2}\), a universal \(\calG\) that is inverse closed and any other gate set \(\calG'\): \(\operatorname{BQP}(\calG, \delta) \geq \operatorname{BQP}(\calG', \delta')\) for some \(0 < \delta' < \frac{1}{2}\).
+\end{cor}
+
+\begin{dfn}
+	Fix any universal gate set \(\calG\) (that is inverse closed) and \(0 < \delta < \frac{1}{2}\). Then \(\operatorname{BQP} := \operatorname{BQP}(\calG, \delta)\).
+\end{dfn}
+
+\end{document}

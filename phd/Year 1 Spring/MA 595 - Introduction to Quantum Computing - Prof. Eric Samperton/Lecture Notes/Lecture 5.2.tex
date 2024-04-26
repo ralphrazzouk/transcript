@@ -1,0 +1,229 @@
+\documentclass{article}
+
+\usepackage{mathptmx,fullpage}
+\usepackage{amssymb,amsmath,amsthm}
+\usepackage{graphicx}
+\graphicspath{ {./images/} }
+
+\newtheorem{thm}{Theorem}
+\newtheorem*{dfn}{Definition}
+\newtheorem{cor}[thm]{Corollary}
+\newtheorem{lem}[thm]{Lemma}
+\newtheorem*{remark}{Remark}
+
+
+\newcommand{\ket}[1]{|#1\rangle}
+\newcommand{\bra}[1]{\langle#1|}
+\newcommand{\braket}[2]{\langle#1|#2\rangle}
+\newcommand{\bbC}{\mathbb{C}}
+\newcommand{\calH}{\mathcal{H}}
+
+\DeclareMathOperator{\poly}{poly}
+
+\begin{document}
+
+\noindent
+\fbox{
+	\parbox{\linewidth}{
+		\vspace{-.3cm}
+{\bf \Large \begin{center}
+CS 593/MA 592 - Intro to Quantum Computing \\
+Spring 2024 \\
+Thursday, February 8 - Lecture 5.2
+\end{center}}
+Today's scribe: Hao Wan
+	}
+}
+
+\vspace{.3cm}
+
+%\noindent {\bf Reading:} Subsections 2.1.7-2.1.9 of Nielsen and Chuang.  You should also be wrapping up the front matter and Chapter 1.
+
+\
+
+\noindent{\bf Agenda:}
+\begin{enumerate}
+\item No-cloning theorem
+\item Superdense coding
+\item Bernstein-Vazirani algorithm
+\item BQP $\subset$ PSPACE
+\end{enumerate}
+
+\section{No-cloning Theorem}
+\begin{thm}
+There does not exist a unitary operator 
+\begin{align*} 
+U: \mathbb{C}^2 \otimes \mathbb{C}^2 & \longrightarrow\mathbb{C}^2 \otimes \mathbb{C}^2\\
+\ket{\psi} \otimes \ket{0} &\longmapsto \ket{\psi} \otimes \ket{\psi}
+\end{align*}
+\end{thm}
+
+\begin{proof}
+
+Suppose there exists such a $U$, we will show it cannot be linear. Observe that
+\begin{align*} 
+U(\ket{\psi_1} \otimes \ket{0}) + U(\ket{\psi_2} \otimes \ket{0}) &= \ket{\psi_1} \otimes \ket{\psi_1} + \ket{\psi_2} \otimes \ket{\psi_2}
+\end{align*}
+Whereas
+\begin{align*}
+U(\ket{\psi_1} \otimes \ket{0} + \ket{\psi_2} \otimes \ket{0})&= U((\ket{\psi_1} + \ket{\psi_2}) \otimes \ket{0}) \\ 
+&= (\ket{\psi_1}+\ket{\psi_2}) \otimes (\ket{\psi_1}+\ket{\psi_2}) \\
+&\neq \ket{\psi_1} \otimes \ket{\psi_1} + \ket{\psi_2} \otimes \ket{\psi_2}
+\end{align*}
+
+\end{proof}
+\begin{remark}
+    More generally, for any vector space V, the following map cannot be linear:
+\begin{align*} 
+    f: V & \longrightarrow V \otimes V\\
+    x &\longmapsto x \otimes x
+\end{align*}
+\end{remark}
+
+\begin{remark}
+    Sometimes CNOT is called COPY for the following reason, but this does not contradict the no-cloning theorem.
+    \begin{align*} 
+        CNOT: \mathbb{C}^2 \otimes \mathbb{C}^2 & \longrightarrow\mathbb{C}^2 \otimes \mathbb{C}^2\\
+        \ket{0} \otimes \ket{0} &\longmapsto \ket{0} \otimes \ket{0} \\
+        \ket{0} \otimes \ket{1} &\longmapsto \ket{0} \otimes \ket{1} \\
+        \ket{1} \otimes \ket{0} &\longmapsto \ket{1} \otimes \ket{1} \\
+        \ket{1} \otimes \ket{1} &\longmapsto \ket{1} \otimes \ket{0} 
+    \end{align*}
+    Typically, we treat the first qubit as the control and the second qubit as the input. However, if we take the first one as the input and the second one as the ancilla, then CNOT copies the input to the ancilla if ancilla=$\ket{0}$, flips and copies the input to the ancilla if ancilla=$\ket{1}$.
+    The name COPY is okay if we remember it's only copying with respect to the computational basis. Notice that CNOT does not copy an arbitrary qubit $\ket{\psi}=\alpha \ket{0}+ \beta \ket{1}$ since
+    \begin{align*}
+        CNOT((\alpha \ket{0}+ \beta \ket{1}) \otimes \ket{0})=CNOT(\alpha\ket{00}+\beta\ket{10})=\alpha\ket{00}+\beta\ket{11}\neq (\alpha \ket{0}+ \beta \ket{1}) \otimes (\alpha \ket{0}+ \beta \ket{1})
+    \end{align*}
+    $(\ket{00}$ is just another notation for $\ket{0} \otimes \ket{0}.)$
+\end{remark}
+ 
+\section{Superdense Coding}
+Recall the teleportation circuit:
+\begin{center}
+    \includegraphics[width=15cm, height=6cm]{QT.jpeg}   
+\end{center}
+
+where the Bell states are (upto a rescaling constant $\frac{1}{\sqrt{2}}$)
+\begin{align*}
+    \ket{\beta_{00}}=\ket{00} + \ket{11}\\
+    \ket{\beta_{01}}=\ket{01} + \ket{10}\\
+    \ket{\beta_{10}}=\ket{00} - \ket{11}\\
+    \ket{\beta_{11}}=\ket{01} - \ket{10}
+\end{align*}
+Superdense coding is a way to ``reverse" quantum teleportation so Bob can send two classical bits to Alice using only one qubit (assuming Alice and Bob always share a Bell pair).
+
+\begin{center}
+    \includegraphics[width=15cm, height=6cm]{SC.jpeg}
+\end{center}
+
+Suppose Bob wants to send a messages $M_2 M_1$, let $C$ be the above circuit, then we claim that $C\ket{00}=\ket{M_2 M_1}$. Indeed, if we let
+\begin{align*}
+\ket{\psi} :=  (Id \otimes Z^{M_1}X^{M_2})\ket{\beta_{00}}
+\end{align*}
+then casework gives us the following table
+\begin{center}
+\begin{tabular}{|c | c|} 
+ \hline
+ $M_2 M_1$ & $\ket{\psi}$ \\
+ \hline
+ 00 & $\ket{\beta_{00}}$  \\ 
+ \hline
+ 01 & $\ket{\beta_{01}}$  \\
+ \hline
+ 10 & $\ket{\beta_{10}}$ \\
+ \hline
+ 11 & $\ket{\beta_{11}}$ \\
+ \hline
+\end{tabular}
+\end{center}
+Note that Alice is applying the reverse of the circuit that the QISP implements, which takes the Bell basis back to the computational basis.  Thus, when she measures, she gets the message $M_2M_1$, as claimed.
+
+\begin{remark}
+    Holevo's theorem implies a quantum channel that can reliably encode n qubits cannot reliably encode more than n bits.
+\end{remark}
+\section{Bernstein-Vazirani Algorithm}
+
+\subsection{Phase Kickback}
+Suppose $f: \{0,1\}^n \longrightarrow \{0,1\}$ is a Boolean function. As usual, let $U_f$ be the unitary dilation of f, which acts on n input qubits and 1 ancilla qubit in the computational basis as $U_f \ket{x,a}=\ket{x,f(x)\oplus a}$.  As a circuit, we write this
+
+\begin{center}
+    \includegraphics[width=10cm, height=6cm]{Uf.jpeg}
+\end{center}
+
+Instead of encoding the value $f(x_1,\dots,x_n)$ in an ancilla register, we could alternatively encode it in a \emph{phase} on $\ket{x_1,\dots,x_n}$.  
+Indeed, consider the following unitary
+\begin{align*}
+    R_f: (\bbC^2)^{\otimes n} &\longrightarrow (\bbC^2)^{\otimes n}\\
+    \ket{x} &\longmapsto (-1)^{f(x)} \ket{x}
+\end{align*}
+which is diagonal in computational basis.
+
+Claim: Oracle access to $U_f$ is equivalent to oracle access to $R_f$. (Going from $U_f$ to $R_f$ is easy; we will discuss the other direction later after going over phase estimation.)
+
+\subsection{Algorithm}
+The Bernstein-Vazirani problem ``hides" a bit string inside of a phase oracle that implements the dot product with the hidden bit string, and asks us to find the hidden bit string.
+
+More precisely, we have a bitstring $b$ of length $n$ hidden by a function $f_b$:
+\begin{align*}
+    f_b: \{0,1\}^n=(\mathbb{Z}/2\mathbb{Z})^n &\longrightarrow \mathbb{Z}/2\mathbb{Z}=\{0,1\} \\
+    x &\longmapsto x \cdot b := x_1 b_1 + \dots x_n b_n
+\end{align*}
+Given black-box access to $f_b$, we want to find $b$. Classically, even with a probabilistic algorithm, we need at least n calls to the oracle to determine $b$. On the other hand, given quantum oracle access to $f_b$ via construction $R_{f_b}$, we need only 1 call to determine $b$ with probability 1. 
+
+Claim: In the following diagram, the bitstring we measure is always $b$ (i.e. with probability 1). In other words, $C\ket{0 \dots 0}=\ket{b}$.
+
+\begin{center}
+    \includegraphics[width=10cm, height=8cm]{Rfb.jpeg}
+\end{center}
+
+To prove this, we will need the following lemma. (You will prove this lemma in Homework 4, Problem 2).
+
+\begin{lem}
+    Let $H$ be the Hadamard matrix, then 
+    $$H^{\otimes n} \ket{x} = \frac{1}{2^{n/2}} \sum_{y=0}^{2^n-1} (-1)^{x \cdot y} \ket{y}$$
+    In particular
+     $$H^{\otimes n} \ket{0 \dots 0} = \frac{1}{2^{n/2}} \sum_{y=0}^{2^n-1} \ket{y}$$
+\end{lem}
+
+Now we prove the claim.
+\begin{proof}
+    By definition of C, definition of $R_{f_b}$, the fact that $b+y=b-y$ in $\mathbb{Z}/2\mathbb{Z}$, and the lemma above,
+    
+    \begin{align}
+        C\ket{0 \dots 0} &= H^{\otimes n} R_{f_b} H^{\otimes n} \ket{0 \dots 0} \nonumber \\
+        &= H^{\otimes n} R_{f_b} (\frac{1}{2^{n/2}} \sum_{x=0}^{2^n-1} \ket{x}) \nonumber \\
+        &= H^{\otimes n}  (\frac{1}{2^{n/2}} \sum_{x=0}^{2^n-1} R_{f_b}\ket{x}) \nonumber \\
+        &= H^{\otimes n}  (\frac{1}{2^{n/2}} \sum_{x=0}^{2^n-1} (-1)^{b \cdot x}\ket{x}) \nonumber \\
+        &= \frac{1}{2^{n/2}} \sum_{x=0}^{2^n-1} (-1)^{b \cdot x} H^{\otimes n}\ket{x} \nonumber \\
+        &= \frac{1}{2^{n/2}} \sum_{x=0}^{2^n-1} (-1)^{b \cdot x} (\frac{1}{2^{n/2}} \sum_{y=0}^{2^n-1} (-1)^{x \cdot y} \ket{y}) \nonumber \\
+        &= \frac{1}{2^{n}} \sum_{x=0}^{2^n-1}  \sum_{y=0}^{2^n-1} (-1)^{x \cdot (b+y)} \ket{y} \nonumber \\
+        &= \frac{1}{2^{n}} \sum_{x=0}^{2^n-1}  \sum_{y=0}^{2^n-1} (-1)^{x \cdot (b-y)} \ket{y} \nonumber \\
+        &= \frac{1}{2^{n}} \sum_{x=0}^{2^n-1}  (-1)^{x \cdot (b-b)} \ket{b} \label{eq1} \\ 
+        &= \frac{1}{2^n} \ket{b} &\text{(or just $\ket{b}$)} \nonumber 
+    \end{align}
+    In (\ref{eq1}), we used the fact that for $y\neq b$, the terms $(-1)^{x \cdot (b-y)}$ cancel out by symmetry, i.e., $ \sum_{y \neq b} (-1)^{x \cdot (b-y)}=0$.
+\end{proof}
+
+\section{BQP $\subset$ PSPACE}
+
+\begin{lem}
+    Given a quantum circuit C on n qubits over a fixed finite gate set $\mathcal{G}$, an $\epsilon >0$, and two bitstrings x,y $\in \{0,1\}^n$, there exists a classical algorithm to find a complex number z such that $|z-\braket{y}{C|x}|<\epsilon$ in polynomial time as a function of the size of C.
+\end{lem}
+
+\begin{proof}
+\begin{align*}
+    C &= g_l \circ g_{l-1} \circ \dots \circ g_1 & (g_i \in \mathcal{G})\\
+    &= g_l \circ id \circ g_{l-1} \circ id \circ \dots \circ id \circ g_1 \\
+    &= \sum_{s_1, \dots, s_{l-1} = 0}^{2^n-1} g_l\ket{s_{l-1}}\braket{s_{l-1}}{g_{l-1} | s_{l-2}} \dots \bra{s_1}g_1 &(id = \sum_{s=0}^{2^n-1} \ket{s}\bra{s}\text{ by the spectral decomposition}) \\
+    \braket{y}{C|x} &= \sum_{s_1, \dots, s_{l-1} = 0}^{2^n-1} \braket{y}{g_l|s_{l-1}}\braket{s_{l-1}}{g_{l-1} | s_{l-2}} \dots \braket{s_1}{g_1|x}
+\end{align*}
+We assume we know the entries of any gate in $\mathcal{G}$ ``exactly."  Each term in the last expression is exactly such an entry.  Now compute $\braket{y}{C|x}$ using a ``running total" iteratively / dynamically.  This takes exponential time (because there are exponentially many terms), but so long as we just got ``one by one" then PSPACE is sufficient.    
+\end{proof}
+
+With more work (in particular, if we keep track of the dependence of the previous procedure by letting $\epsilon = \frac{1}{2^n}$, then we can show
+
+\begin{thm}
+    BQP $\subset$ PSPACE
+\end{thm}
+s
+\end{document}

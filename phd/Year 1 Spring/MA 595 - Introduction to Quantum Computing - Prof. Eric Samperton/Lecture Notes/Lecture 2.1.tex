@@ -1,0 +1,310 @@
+\documentclass{article}
+
+\usepackage{mathptmx,fullpage}
+\usepackage{amssymb,amsmath,amsthm}
+\usepackage{mathrsfs}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem*{definition}{Definition}
+\newtheorem*{example}{Example}
+\newtheorem*{remark}{Remark}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{lemma}[theorem]{Lemma}
+
+\newcommand{\ket}[1]{|#1\rangle}
+\newcommand{\bra}[1]{\langle#1|}
+\newcommand{\braket}[2]{\langle#1|#2\rangle}
+\newcommand{\ketbra}[2]{|#1\rangle\langle #2|}
+\newcommand{\bbC}{\mathbb{C}}
+\newcommand{\calH}{\mathcal{H}}
+
+\begin{document}
+
+\noindent
+\fbox{
+	\parbox{\linewidth}{
+		\vspace{-.3cm}
+{\bf \Large \begin{center}
+CS 593/MA 592 - Intro to Quantum Computing \\
+Spring 2024 \\
+Tuesday, January 16 - Lecture 2.1
+\end{center}}
+Today's scribe: Xiaoyu
+	}
+}
+
+\vspace{.3cm}
+
+\noindent {\bf Reading:} Subsections 2.1.7-2.1.9 of Nielsen and Chuang.  You should also be wrapping up the front matter and Chapter 1.
+
+\
+
+\noindent{\bf Agenda:}
+\begin{enumerate}
+\item Bra-ket notation
+\item Definition and properties of tensor products
+\item Simultaneous diagonalizability theorem
+\end{enumerate}
+
+\section{Bra-ket notation}
+
+\subsection{Definitions and relation to the dual Hilbert space} 
+
+We sometimes call vectors in a Hilbert space \emph{kets}, and will denote them using the notation $\ket{x}$.
+Here $x$ is just a label/variable name for the ket/vector.
+Note that there is nothing to define here.
+Indeed, this really is just notation, no different from how we might write vectors as $\vec{x}$ in a multivariable calculus class.
+
+For example, if $A: \mathscr{H} \to  \mathscr{H}$ is a Hermitian operator with an eigenvalue $\lambda$, we might write $\left| \lambda \right\rangle $ to denote an eigenvector of $A$ with eigenvalue $\lambda$. Then  $A \left| \lambda \right\rangle  = \lambda \left| \lambda \right\rangle$.  Pretty convenient!
+
+We use \emph{bra-ket} notation to represent the inner product:
+\[ \left\langle x \middle| y \right\rangle := \braket{\ket{x}}{\ket{y}}.\]
+
+While kets and bra-kets are ``just" notation, and since a ket is half of a bra-ket, one might wonder what the ``other half" of a bra-ket really is.  These are called \emph{bras}, but they are not ``just" notation, they require a definition.
+
+Given any Hilbert space $\calH$, the \emph{dual space} $\calH^*$ is defined to be the vector space 
+\[ \mathscr{H}^* := \{f: \mathscr{H} \to  \mathbb{C} | f \text{ linear and bounded}\}. \]
+Here $f$ is \emph{bounded} if the (operator) norm of $f$ is not infinity:
+\[ \|f\| := \inf_{\ket{\psi} \in \calH - \{\mathbf{0}\}} \frac{\|f\ket{\psi}\|}{\|\ket{\psi}\|} < \infty.\]
+If $\calH$ is finite-dimensional, then all linear maps $f: \calH \to \bbC$ are bounded, so don't worry too much about understanding the word ``bounded" if you haven't already heard about it before.  
+
+It is easy to check that $\mathscr{H}^*$ is a vector space.
+It turns out that the vector space $\calH^*$ can be equipped with a unique inner product whose length function agrees with the operator norm, and moreover, the resulting complex inner product on $\calH^*$ is complete.  In other words, we can make $\calH^*$ into a Hilbert space (in a canonical way, in fact).  The abstract details of this aren't so important for us, because of what I'm about to say.\footnote{Here is the summary version, if you're interested: the operator norm on $\calH^*$ turns it into a so-called \emph{Banach space} (roughly, a vector space with a notion of length, but not necessarily with a notion of angle/inner product).  Moreover, this length function satisfies the \emph{polarization identity}, which allows us to define a unique inner product whose length function agrees with the given length function.  See Exercise }
+
+In mathematics, the elements of $\calH^*$ are often called \emph{(bounded) linear functionals} on $\calH$, but we will do as in physics, and call them \emph{bras} (or \emph{dual vectors}).  Given any ket $\ket{\psi} \in \calH$, there is an obvious way to write down a bra, denoted $\bra{\psi}$ and defined as follows:
+\[ \begin{aligned}
+	\bra{\psi}: \calH &\to \bbC \\
+	\ket{\phi} &\mapsto \braket{\psi}{\phi}.
+\end{aligned} \]
+In fact, this construction gives rise to a ``canonical" map between $\mathscr{H}$ and $\mathscr{H}^*$ :
+\begin{align*}
+	\Phi: \mathscr{H} &\longrightarrow \mathscr{H}^* \\
+	\left| \psi \right\rangle  &\longmapsto \left\langle \psi \right| 
+\end{align*}
+The Riesz representation theorem says (in particular) that $\Phi$ is a bijection.  You will prove this in the finite dimensional case on HW1.  (The proof in the infinite dimensional case requires analysis---in particular, one has to use the fact that Hilbert spaces are \emph{complete}.)
+
+Note that even though $\Phi$ is a bijection, it is \emph{not} linear---it is actually \emph{conjugate linear}: 
+\[
+\Phi (c \left| \psi \right\rangle ) \left| \phi \right\rangle = c^* \left\langle \psi \middle| \phi \right\rangle \ne c \braket{\psi}{\phi} \] 
+for any scalar $c \in \bbC$ with non-zero imaginary part.
+
+\subsection{Outer products and operators in bra-ket notation}
+
+The bra-ket notation is especially useful because we can combine bras and kets in the ``wrong order'' and get something helpful. In the ``correct" order we get the usual \textit{inner product}
+\[
+	\mathscr{H}^* \times \mathscr{H} \to  \mathbb{C}
+\] 
+\[
+	\left( \left\langle \phi \right| , \left| \psi \right\rangle  \right)  \mapsto \left\langle \phi \middle| \psi \right\rangle 
+.\] 
+In the ``wrong" order we get the \textit{outer product}
+\begin{align*}
+	\mathscr{H} \times  \mathscr{H}^* &\longrightarrow \mathcal{B}(\mathscr{H}) \\
+	\left( \left| \psi \right\rangle , \left\langle \phi \right|   \right)  &\longmapsto \left| \psi \right\rangle \left\langle \phi \right| ,
+\end{align*}
+where, by definition, $\ketbra{\psi}{\phi}$ is the linear operator
+\begin{align*}
+	\left| \psi \right\rangle \left\langle \phi \right| : \mathscr{H} &\longrightarrow \mathscr{H} \\
+	\left| x \right\rangle  &\longmapsto \left| \psi \right\rangle \left\langle \phi \middle| x \right\rangle 
+.\end{align*}
+In Homework 2, you will show that the outer product gives rise to an isomorphism $\calH \otimes \calH^* \to \mathcal{B}{\calH}$ (note that the $\times$ is now a $\otimes$).
+
+\begin{example}
+		On the space $\mathbb{C}^2 = \text{span}_{\mathbb{C}} \{\left| 0 \right\rangle , \left| 1 \right\rangle \} $, we have
+			\[
+				\left| 0 \right\rangle \left\langle 0 \right| \doteq 
+					\begin{bmatrix}
+						1 & 0 \\
+						0 & 0 \\
+					\end{bmatrix}
+			.\] 
+			\[
+				\left| 1 \right\rangle \left\langle 0 \right| \doteq
+					\begin{bmatrix}
+						0 & 0 \\
+						1 & 0 \\
+					\end{bmatrix}
+			.\] 
+			Similar for $\left| 0 \right\rangle \left\langle 1 \right| $ and $\left| 1 \right\rangle \left\langle 1 \right| $.
+			Thus, we have
+			\[
+				\begin{bmatrix}
+					a & b \\
+					c & d \\
+				\end{bmatrix}
+				= a \left| 0 \right\rangle \left\langle 0 \right| + b \left| 0 \right\rangle \left\langle 1 \right|  + c \left| 1 \right\rangle  \left\langle 0 \right|  + d \left| 1 \right\rangle \left\langle 1 \right| 
+			.\] 
+\end{example}
+
+More generally, if we write the operator
+\[
+A: \mathbb{C}^d \to \mathbb{C}^d
+\] 
+as the matrix $A = \left( a_{i j} \right)$ with respect to the standard basis of $\bbC^d$, then we have
+\[
+A = \sum_{i=0}^{d-1} a_{i j} \left| i \right\rangle  \left\langle j \right| .
+\] 
+
+\begin{example}
+	$I: \mathbb{C}^d \to \mathbb{C}^d$ can be written as
+	\[
+		I = \sum_{i = 0}^{ d - 1} \left| i \right\rangle  \left\langle i \right| 
+	.\] 
+\end{example}
+
+\begin{example}
+	If $D = \operatorname{diag} \left( \lambda_0, \ldots, \lambda_{d - 1} \right) : \mathbb{C}^d \to \mathbb{C}^d$, then
+	\[
+		D = \sum_{i = 0}^{d - 1} \lambda_i \left| i \right\rangle  \left\langle i \right| 
+	.\] 
+\end{example}
+
+
+\section{Tensor Products}
+
+\subsection{Tensor product of Hilbert spaces}
+
+I will define the tensor product $\otimes $ using orthonormal bases. 
+
+Let $V$ be a Hilbert space with orthonormal basis $\mathcal{B}_1 = \{v_1, \ldots, v_m\} $, and $W$ be another Hilbert space with $\mathcal{B}_2 = \{w_1, \ldots, w_n\} $.
+
+Then the \textit{tensor product} is defined to be the Hilbert space $V \otimes W$ with orthonormal basis given by
+\[
+	\{\left| v_i \right\rangle  \otimes \left| w_j \right\rangle : 1 \le  i \le m, i \le j \le  n\} 
+\] 
+satisfying the following rules:
+\begin{enumerate}
+	\item For all $z \in \mathbb{C}$, 
+		\[
+			z\left( \left| v_i \right\rangle  \otimes  \left| w_j \right\rangle  \right)  = \left( z \left| v_i \right\rangle  \right) \otimes  \left| w_j \right\rangle  = \left| v_i \right\rangle  \otimes  \left( z \left| w_j \right\rangle  \right) 
+		.\] 
+	\item For all $1 \le i \le m$, $1 \le  j \le m$, $1 \le  k \le  n$, 
+		\[
+			\left( \left| v_i \right\rangle  + \left| v_j \right\rangle  \right)  \otimes  \left| w_k \right\rangle  = 
+			\left| v_i \right\rangle  \otimes  \left| w_k \right\rangle  + \left| v_j \right\rangle  \otimes  \left| w_k \right\rangle 
+		.\] 
+		Similarly, for all $1 \le  i \le m$, $1 \le  j, k \le n$,
+		\[
+			\left| v_i \right\rangle  \otimes  \left( \left| w_j \right\rangle  + \left| w_k \right\rangle  \right) 
+			= \left| v_i \right\rangle  \otimes  \left| w_j \right\rangle  + \left| v_k \right\rangle  \otimes  \left| w_k \right\rangle 
+		.\] 
+\end{enumerate}
+We can check, that $\{v_i \otimes  w_k: i, k\} $ really is a basis. The inner product on $V \otimes W$ is defined so that this is a orthonormal basis.
+
+Sometimes we might write $\left| v_i, w_k \right\rangle $ for $\left| v_i \right\rangle  \otimes \left| w_k \right\rangle $.
+
+The \emph{curse of dimensionality}. Observe that $\operatorname{dim} V \otimes W = \left( \operatorname{dim} V \right)  \left( \operatorname{dim} W \right) .$ 
+For example, for a $n$-qubit quantum memory, $\operatorname{dim} \left( \mathbb{C}^2 \right) ^{\otimes  n} = 2^n .$ This is a big part of reason why simulating quantum systems with classical computers is typically very difficult.
+
+\textbf{Binary Representation of Qubit States.}  Note that even though we defined the tensor product of Hilbert spaces of $V$ and $W$ by using bases, if the bases are \emph{ordered}, then there is still not really a natural way to order the basis of $V\otimes W$.  But it's really helpful to have ordered, because matrix representations of operators are made with respect to ordered bases (not unordered ones).
+
+So, we will typically use the convention that if $\{v_0,v_1,\dots,v_{n-1}\}$ and ${w_0,\dots,w_{m-1}}$ are ordered bases of $V$ and $W$, respectively, then the basis $\{v_i \otimes w_j\}$ is ordered ``lexicographically"\footnote{also called the ``dictionary" ordering}, meaning it looks like this:
+\[ v_0 \otimes w_0, v_0 \otimes w_1, \dots, v_0 \otimes w_{m-1}, v_1 \otimes w_0, \dots, v_1 \otimes w_{m-1}, \dots, v_{n-1} \otimes w_0, \dots, v_{n-1} \otimes w_{m-1}.\]
+Of course, we can iterate this construction for a big tensor product of lots of Hilbert spaces: $V_0 \otimes V_1 \otimes \cdots V_{k-1}$.
+
+This is especially useful for understanding states on qubits, since it means that our preferred ordered basis for a system of $n$ qubits is 
+\[ \ket{0} \otimes \ket{0} \otimes \cdots \otimes \ket{0}, \ \ \ \ket{0} \otimes \ket{0} \cdots \otimes \ket{1}, \ \ \  \dots, \ \ \ \ket{1} \otimes \ket{1} \otimes \cdots \otimes \ket{0}, \ \ \ \ket{1} \otimes \cdots \otimes \ket{1} .\]
+I said that somtimes we would write $\ket{ v_i, w_j}$ instead of $\ket{v_i} \otimes \ket{w_j}$.  If we do this to the above basis, then we get
+\[ \ket{0, \dots, 0}, \ \ \ \ket{0,\dots,1}, \ \ \, \ket{ 1, 1, \dots, 0}, \ \ \ \ket{1, \dots, 1}.\]
+In particular, we will often conflate $(\mathbb{C}^2)^{\otimes n}$ with $\mathbb{C}^{2^n}$ via the preferred/standard isomorphism
+\[\begin{aligned}
+(\mathbb{C}^2)^{\otimes n} &\to \mathbb{C}^{2^n} \\
+\ket{i_{n-1}, i_{n-2}, \dots, i_1, i_0} &\mapsto \ket{i_{n-1}i_{n-2}\cdots i_1i_0}
+\end{aligned}\]
+where $i_{n-1}i_{n-2}\cdots i_1i_0$ is understood to be the binary expansion of some number $0 \le b \le 2^n-1$, namely,
+\[ b = \sum_{k=0}^{n-1} i_k 2^k. \]
+
+This allows us to do a very convenient thing.  \emph{A priori}, a vector $\ket{x}$ in $(\bbC^2)^{\otimes n}$ looks like a big multi-sum:
+\[
+\left| x \right\rangle  = \sum_{i_1 = 0}^1 \ldots \sum_{i _n = 0}^1 z_{i_1, \ldots, i_n} \left| i_1 \right\rangle  \otimes  \ldots \otimes  \left| i_n \right\rangle.\]
+But now we can rewrite this as
+\[ \ket{x} = \sum_{b=0}^{2^n-1} z_b \left| b \right\rangle 
+.\] 
+
+
+\begin{example}
+	Let $\left| x \right\rangle = \left| 0 \right\rangle  + \left| 1 \right\rangle  \in \mathbb{C}^2$,  $\left| y \right\rangle  = \left| 0 \right\rangle  - \left| 1 \right\rangle  \in \mathbb{C}^2$, then
+	\begin{align*}
+		\left| x \right\rangle \otimes \left| y \right\rangle &= \left( \left| 0 \right\rangle  + \left| 1 \right\rangle  \right) \otimes \left( \left| 0 \right\rangle  - \left| 1 \right\rangle  \right)  \\
+		&= \left| 00 \right\rangle - \left| 01 \right\rangle  + \left| 10 \right\rangle  - \left| 11 \right\rangle  
+	.\end{align*}
+\end{example}
+
+\subsection{Tensor product of operators}
+Not only can we define tensor products of Hilbert spaces---we can also define tensor products of operators between Hilbert spaces.\footnote{Tensor product gives a \emph{bifunctor} on the category whose objects are Hilbert spaces and whose morphisms are (bounded) maps between Hilbert spaces.}
+This is sometimes called the Kronecker product when expressed using matrices.
+
+Let $\{v_i\}$ and $\{w_j\}$ be orthonormal bases of $V_1$ and $W_1$, and let
+$A: V_1 \to W_1, B: V_2 \to W_2$ be two operators.  Then we define $A \otimes B: V_1 \otimes V_2 \to W_1 \otimes W_2$ by requiring that
+\[
+	(A \otimes B) (v_i \otimes w_j) = (A v_i) \otimes (B w_j)
+.\] 
+Alternatively, we can define $A \otimes B$ using a block matrix:
+\[
+	A \otimes B = 
+	\begin{bmatrix}
+		A_{1 1}B & A_{1 2} B & \ldots & A_{1 m}B \\
+		A_{2 1}B & A_{2 2}B & \ldots & A_{2 m}B \\
+		\vdots & \vdots & \vdots & \vdots \\
+		A_{m 1}B & A_{m 2}B & \ldots & A_{m n}B \\
+	\end{bmatrix}
+.\] 
+
+\begin{example}
+	\[
+		Z \otimes X = 
+		\begin{bmatrix}
+			1 & 0 \\
+			0 & -1 \\
+		\end{bmatrix}
+		\otimes 
+		\begin{bmatrix}
+			0 & 1 \\
+			1 & 0 \\
+		\end{bmatrix}
+		=
+		\begin{bmatrix}
+			0 & 1 & 0 & 0 \\
+			1 & 0 & 0 & 0 \\
+			0 & 0 & 0 & -1 \\
+			0 & 0 & -1 & 0 \\
+		\end{bmatrix}
+		\neq X \otimes Z
+	.\] 
+\end{example}
+
+\section{Simultaneous diagonalization}
+
+
+
+	Given $A, B: \mathscr{H} \to \mathscr{H}$, their \textit{commutator} is $[A, B] = AB - BA$. We say $A, B$ are \textit{simultaneously diagonalizable} if there exists an orthonormal basis of $\mathscr{H}$, with respect to which both $A$ and $B$ are diagonal.
+
+\begin{theorem}[Simultaneous diagonalization]
+	\label{thm:SimultaneousDiagonalization}
+	Let $A, B$ be two normal operators. $A, B$ are simultaneously diagonalizable iff they commute.
+\end{theorem}
+\begin{proof}
+	The $\Rightarrow$ direction is trivial.
+
+	For the $\Leftarrow$ direction, see the book for the full argument (at least in the case that $A$ and $B$ are Hermitian---I don't remember if the book's argument works for the general case of normal operators).  We will make a simplifying assumption: all of the eigenspaces of both $A$ and $B$ are one-dimensional.
+
+	Now assume that $AB = BA$. Since $A$ and $B$ are both normal, we can diagonalize both of them:
+\[ \begin{aligned}
+	A &= \sum \lambda_i \ketbra{\lambda_i}{\lambda_i} \\
+	B &= \sum \lambda_i' \ketbra{\lambda_i'}{\lambda_i'}
+\end{aligned}\]
+We have
+	\[
+		A B \left| \lambda_i \right\rangle 
+	= B A \left| \lambda_i \right\rangle 
+	= B \lambda_i \left| \lambda_i \right\rangle 
+	= \lambda_i B \left| \lambda_i \right\rangle 
+	.\] 
+Thus, $B \ket{\lambda_i}$ is an eigenvector of $A$ with eigenvalue $\lambda_i$. Since we are assuming the eigenspaces of $A$ are all 1-dimensional, there must exist a scalar $b_i$ such that $B \left| \lambda_i \right\rangle  = b_i \left| \lambda_i \right\rangle $.  But this means that $\ket{\lambda_i}$ is an eigenvector of $B$ with eigenvalue $b_i$!  Since we are also assuming that the eigenspaces of $B$ are all 1-dimensional, this means there exists a \emph{unique} index $j_i$ such that $\lambda_{j_i}' = b_i$ and $\ket{\lambda_{j_i}'} = \ket{\lambda_i}$.  In other words
+\[ B \sum_j \lambda_j' \ketbra{\lambda_j'}{\lambda_j'} = \sum_i b_i \ketbra{\lambda_i}{\lambda_i}. \]
+Thus $B$ is diagonal with respect to the same basis as $A$.
+\end{proof}
+
+
+
+\end{document}

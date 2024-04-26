@@ -1,0 +1,211 @@
+\documentclass{article}
+
+\usepackage{mathptmx,fullpage}
+\usepackage{amssymb,amsmath,amsthm}
+\usepackage{framed}
+
+\newtheorem{thm}{Theorem}
+\newtheorem*{dfn}{Definition}
+\newtheorem{cor}[thm]{Corollary}
+\newtheorem{lem}[thm]{Lemma}
+\newtheorem*{note}{Note}
+\newtheorem*{remark}{Remark}
+
+
+\newcommand{\ket}[1]{|#1\rangle}
+\newcommand{\bra}[1]{\langle#1|}
+\newcommand{\braket}[2]{\langle#1|#2\rangle}
+\newcommand{\norm}[1]{\left\lVert #1 \right\rVert}
+\newcommand{\bbC}{\mathbb{C}}
+\newcommand{\calH}{\mathcal{H}}
+\newcommand{\qbit}{\bbC^2}
+\newcommand{\qbits}[1]{(\qbit)^{\otimes #1}}
+
+\DeclareMathOperator{\poly}{poly}
+
+\begin{document}
+
+\noindent
+\fbox{
+	\parbox{\linewidth}{
+		\vspace{-.3cm}
+{\bf \Large \begin{center}
+CS 593/MA 592 - Intro to Quantum Computing \\
+Spring 2024 \\
+Thursday, January 18 - Lecture 2.2
+\end{center}}
+Today's scribe: Aman
+	}
+}
+
+\vspace{.3cm}
+
+\noindent {\bf Reading:} Subsection 2.2 of Nielsen and Chuang. 
+
+\
+
+\noindent{\bf Agenda:}
+\begin{enumerate}
+\item Axioms of Quantum Mechanics.
+\end{enumerate}
+In the most common formulation of quantum mechanics, there are usually four axioms given, which is also the case in Nielsen and Chuang. We will follow the same tradition, albeit we will be presenting the axioms in a different order with the measurement axiom coming at the end.
+
+\section{The Axioms of Quantum Mechanics}
+In this section, we present the four axioms or postulates of quantum mechanics.
+\begin{note}
+    These axioms will be for ``closed'' systems. This is quite a restrictive assumption as no experiment we can perform in the real world will behave exactly as such.  (In some sense, the fault tolerance problem in quantum computing is to over come this issue sufficiently well in order to build an error-free, programmable quantum mechanical system.) However, one can derive the behavior of open systems from these.
+\end{note}
+Roughly, the axioms answer the following questions:
+\begin{enumerate}
+    \item What is quantum stuff?
+    \item How do we combine quantum stuff?
+    \item Howe does quantum stuff behave dynamically, i.e., how does it change over time?
+    \item And, perhaps the most important one: What happens when we look at quantum stuff, i.e., measure it?\footnote{This is the subtlest one and the one you should be most focused on understanding.}
+\end{enumerate}
+Here, the first three deal with the question: What's going on inside a box? The last one answers: What happens when we open the box? The answer that the axiom gives has been fairly contentious for both physicists and philosophers, since ``wavefunction collapse" seems to contradict unitarity.  We will blissfully ignore these important foundational question, and now start presenting the axioms in the sequel with the name of the postulates inherited from the ordering in Nielsen and Chuang.
+
+\subsection{Postulate 1.}
+\begin{framed}
+\underline{Postulate 1:}
+\begin{quote}
+\textit{The set of all (pure) configurations of a quantum system is described by some Hilbert space $\calH$. Any non-zero vector in $\calH$ is called a {\em (pure) state}. The Hilbert space $\calH$ is called the {\em state space}.}
+\end{quote}
+\end{framed}
+We now provide some examples of instantiation of the above postulate:
+
+\paragraph{Examples.}
+\begin{enumerate}
+    \item A qubit is any quantum mechanical system where $\calH \cong \bbC^2$.
+    \item A free particle in $3$-dimensional space; $\calH \cong \mathcal{L}^2(\mathbb{R}^3)$.
+    \item An electron, say in a hydrogen atom, trapped in one of two orbital configurations (ignoring the electron's spin) is a qubit, since $\calH \cong \qbit$. However, strictly speaking, $\calH < \mathcal{L}^2(\mathbb{R}^3)$ is a subspace of the state space of a free particle.
+\end{enumerate}
+
+\begin{note}
+    Nielsen and Chuang requires all states to have length $1$. A priori, their definition is much more constrained than ours. However, this is not a big deal (justifying this requires the measurement axiom). That is,
+    \[
+    \ket{\psi} \overset{{\Large \leadsto}}{\text{\tiny normalize}} \frac{1}{\braket{\psi}{\psi}^{1/2}} \ket{\psi} = \frac{\ket{\psi}}{\norm{\ket{\psi}}}.
+    \]
+\end{note}
+\begin{dfn}
+Further, if $\ket{\psi_1}, \ldots, \ket{\psi_k} \in \calH$ are non-zero vectors (i.e., states) and we have
+\begin{equation}
+    \label{eq: nonzero-sum-states}
+    \ket{\psi} = \sum_{i \in [k]} z_i \ket{\psi_i} \neq \Vec{0}
+\end{equation}
+for some $z_i \in \bbC$, then we say that $\ket{\psi}$ is a {\em quantum superposition} of the $\ket{\psi_i}$'s. The $z_i$s in \eqref{eq: nonzero-sum-states} are called unnormalized amplitudes. The {\em (normalized) amplitudes} are given by \[\frac{z_i}{\braket{\psi}{\psi}^{1/2}}.\]
+\end{dfn}
+
+\subsection{Postulate 4.}
+\begin{framed}
+\underline{Postulate 4:}
+\begin{quote}
+\textit{Given two disjoint quantum systems with state space $\calH_1$ and $\calH_2$, the state space of the combined quantum system is the tensor product $\calH_1 \otimes \calH_2$.}
+\end{quote}
+\end{framed}
+Here are some examples to illustrate the above postulate:
+\paragraph{Examples.}
+\begin{enumerate}
+    \item For two qubits, we have $\calH \cong \bbC^2 \otimes \bbC^2$.
+    \item For $n-$qubits, we have $\calH \cong (\bbC^2)^{\otimes n} \triangleq \bbC^2 \underbrace{\otimes \cdots \otimes}_{n \text{ times}} \bbC^2$.
+\end{enumerate}
+\begin{dfn}
+We call the ordered basis 
+\[
+	\ket{0 \cdots 0}, \ket{0 \cdots 01}, \ket{0 \cdots 10}, \ket{0 \cdot 11}, \ldots \ket{11 \cdots 10}, \ket{1 \cdots 1}
+\]
+the {\em computational basis} of $\qbits{n}$.
+\end{dfn}
+
+\subsection{Postulate 2.}
+\begin{framed}
+\underline{Postulate 2 (Global Version):}
+\begin{quote}
+	\textit{Given a closed quantum system with state space $\calH$ and two moments in time $t_1 < t_2$, there exists a unitary operator $U: \calH \to \calH$ such that if the system is in state $\ket{\psi_1}$ at time $t_1$, then at time $t_2$, the system will be in state $\ket{\psi_2} = U\ket{\psi_1}$.}
+
+\textit{Put simply, time evolution is unitary.}
+\end{quote}
+\end{framed}
+We again offer instances to exemplify the above postulate:
+
+\paragraph{Examples.}
+\begin{enumerate}
+    \item The identity matrix $I: \calH \to \calH$ is unitary and changes nothing.
+    \item Define $H: \bbC^2 \to \bbC^2$, the {\em Hadamard gate}, by 
+    \begin{equation}
+        \label{eq: hadamard-gate}
+        H \triangleq \frac{1}{\sqrt{2}} \begin{pmatrix}
+            1 & 1 \\
+            1 & -1
+        \end{pmatrix}.
+    \end{equation}
+    Moreover, let $\ket{+} = H\ket{0} = \frac{1}{\sqrt{2}}(\ket{0} + \ket{1})$ and $\ket{-}= H\ket{1} = \frac{1}{\sqrt{2}} (\ket{0} - \ket{1})$. It is easy to check that $\ket{+}, \ket{-}$ form an orthonormal basis of $\bbC^2$, whence we see $H$ is unitary. Now, note here that $H\ket{+} = \ket{0}$ and $H\ket{-} = \ket{1}$, and thus, $H^2 = I$. This then implies that the eigenvalues of $H$ are $\pm 1$. 
+
+    Further, note that we have 
+    \begin{align*}
+        H(\ket{0} + \ket{+}) &= \ket{+} + \ket{0} \\
+        &= \ket{0} + \ket{+},
+    \end{align*}
+    which is the eigenvector of $H$ corresponding to the eigenvalue $1$. One might be tempted to guess that the other eigenvector is perhaps $\ket{1} + \ket{-}$, but it is a scalar multiple of $\ket{0} + \ket{+}$! Instead, the eigenvector corresponding to $H$ is $\ket{1} - \ket{-}$:
+    \begin{align*}
+        H(\ket{1} - \ket{-}) &= \ket{-} - \ket{1} \\
+        &= -(\ket{1} - \ket{-}).
+    \end{align*}
+    \item The $n$th tensor product $H^{\otimes n}: (\bbC^2)^{\otimes n} \to (\bbC^2)^{\otimes n}$ acts on $n$-qubits. For instance, we have
+    \begin{align*}
+        H^{\otimes n}\ket{0 \cdots 0} 
+        &= (H\ket{0})^{\otimes n} \\
+        &= (\ket{+})^{\otimes n} \\
+        &= \left(\frac{\ket{0} + \ket{1}}{\sqrt{2}}\right)^{\otimes n} \\
+        &= \left(\frac{1}{\sqrt{2}}\right)^n \sum_{i= 0}^{2^n - 1} \underbrace{\ket{i}}_{\text{expressed in binary.}}.
+    \end{align*} 
+    Thus, $H\ket{0 \cdots 0}$ is an equal superposition of all of the computational basis vectors.  This state gets used a lot in quantum algorithms (and is at the root of the common misconception that quantum computers can ``computer all possible inputs to a problem in parallel"---do not make that mistake yourself!).
+\end{enumerate}
+\begin{framed}
+\underline{Postulate 2 (Infinitesimal Version):}
+\begin{quote}
+\textit{Given a closed quantum system with state space $\calH$, there exists a Hermitian operator $H: \calH \to \calH$ called the {\em quantum Hamiltonian} such that the time evolution of the system is determined by the differential equation:
+\begin{equation}
+    \label{eq: schrodinger}
+    i \hslash \frac{d}{dt} \ket{\psi} = H\ket{\psi}.
+\end{equation}
+This is the famous {\em Schr\"odinger's equation}. Note that $\hslash$ is some universal physical constant $\hslash \in \mathbb{R}$ called the {\em Planck's constant}.
+}
+\end{quote}
+\end{framed}
+\paragraph{Interpretation.} Since $H$ plays the role of the ``observable of energy", the above gives a quantum formulation of conservation of energy.  Making this precise requires the measurement axiom.
+\begin{remark}
+    The infinitesimal and global versions of postulate 2 are equivalent as we shall now show.
+\end{remark}
+\noindent Consider \eqref{eq: schrodinger} as follows:
+\[
+i \hslash \frac{d}{dt} \ket{\psi} = H\ket{\psi} \iff  \frac{d}{dt} \ket{\psi} = \frac{-i}{\hslash}H\ket{\psi}.
+\]
+Letting $\ket{\psi; t_1}$ and $\ket{\psi; t_2}$ as the state $\psi$ at times $t_1 < t_2$, we have
+\begin{align}
+    \ket{\psi; t_2} 
+    &= \int_{t_1}^{t_2} \frac{-i}{\hslash}H\ket{\psi; t_1} dt \nonumber\\
+    &= \left(\int_{t_1}^{t_2} \frac{-i}{\hslash}H dt \right)\ket{\psi; t_1}\nonumber \\
+    &= \exp\left[\frac{-i}{\hslash}H (t_2 - t_1) \right]\ket{\psi; t_1}\label{eq: diff-solution},
+\end{align}
+where we recall that $\dot{x}(t) = Ax \implies x(t) = \exp(At)x(0)$ in \eqref{eq: diff-solution}. One can now check that the exponential term is unitary precisely because $H$ is Hermitian.
+
+\subsection{Postulate 3.}
+\begin{framed}
+\underline{Postulate 3 (Projecive Measurement Version, aka the Born Rule):}
+\begin{quote}
+\textit{Given a quantum mechanical system with state space $\calH$, the {\em observables} (i.e., observable physical quantity) of this system are precisely the Hermitian operators $M: \calH \to \calH$.}
+
+\textit{The set of {\em outcomes} associated to the measurement of an observable $M$ is exactly the set of eigenvalues of $M$ (without multiplicity).}
+
+\textit{Moreover, if the system is in state $\ket{\psi}$ when $M$ is measured, then we get an outcome $\lambda$ with probability
+\begin{equation}
+    \label{eq: measure-prob}
+    \mathrm{Pr}(\lambda|\ket{\psi}) \triangleq \frac{\braket{\psi|P_{\lambda}}{\psi}}{\lvert\braket{\psi}{\psi} \rvert},
+\end{equation}
+}
+where $P_{\lambda}$ is the orthogonal projection onto the $\lambda$-eigenspace of $M$. 
+
+\textit{Finally, if we observe outcome $\lambda$, then the system will change to be in the state $P_{\lambda}\ket{\psi}$, also known as ``measurement collapse.'' It is important to note here that this is no longer unitary.}
+\end{quote}
+\end{framed}
+\end{document}
