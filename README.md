@@ -90,8 +90,16 @@ A compilation of all math, physics, or computer science course work that I have 
 
 ## Fall 2024
 
--   PHYS 630 - Advanced Electricity and Magnetism I
--   PHYS 661 - Quantum Mechanics II
--   PHYS 662 - Quantum Field Theory I
--   MA 562 - Introduction to Differential Geometry and Topology
--   MA 571 - Topology
+-   [PHYS 570AI](https://github.com/ralphrazzouk/transcript/phd/y1/spring/PHYS570AI) - AI and Physics
+-   [PHYS 630](https://github.com/ralphrazzouk/transcript/phd/y1/spring/PHYS630) - Advanced Electricity and Magnetism I
+-   [PHYS 661](https://github.com/ralphrazzouk/transcript/phd/y1/spring/PHYS661) - Quantum Mechanics II
+-   [PHYS 662](https://github.com/ralphrazzouk/transcript/phd/y1/spring/PHYS662) - Quantum Field Theory I
+-   [MA 562](https://github.com/ralphrazzouk/transcript/phd/y1/spring/MA562) - Introduction to Differential Geometry and Topology
+
+# Spring 2025 (UNOFFICAL)
+
+-  PHYS 580 - Computational Physics
+-  PHYS 631 - Advanced Electricity and Magnetism II
+-  PHYS 663 - Quantum Field Theory II
+-  PHYS 680 - General Relativity
+-  MA 595 - Infinite Dimensonal Lie Algebras and Applications 
