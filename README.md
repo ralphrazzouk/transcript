@@ -82,24 +82,23 @@ A compilation of all math, physics, or computer science course work that I have 
 
 ## Spring 2024
 
--   [ASTR 562](https://github.com/ralphrazzouk/transcript/phd/y1/spring/ASTR562) - Introduction to High-Energy Astrophysics
--   [PHYS 601](https://github.com/ralphrazzouk/transcript/phd/y1/spring/PHYS601) - Methods of Theoretical Physics II
--   [PHYS 617](https://github.com/ralphrazzouk/transcript/phd/y1/spring/PHYS617) - Statistical Physics
--   [PHYS 660](https://github.com/ralphrazzouk/transcript/phd/y1/spring/PHYS660) - Quantum Mechanics I
--   [CS 592/MA 595](https://github.com/ralphrazzouk/transcript/phd/y1/spring/MA595) - Introduction to Quantum Computing
+-   [ASTR 562](./phd/y1/spring/ASTR562) - Introduction to High-Energy Astrophysics
+-   [PHYS 601](./phd/y1/spring/PHYS601) - Methods of Theoretical Physics II
+-   [PHYS 617](./phd/y1/spring/PHYS617) - Statistical Physics
+-   [PHYS 660](./phd/y1/spring/PHYS660) - Quantum Mechanics I
+-   [CS 592/MA 595](./phd/y1/spring/MA595) - Introduction to Quantum Computing
 
 ## Fall 2024
 
--   [PHYS 570AI](https://github.com/ralphrazzouk/transcript/phd/y1/spring/PHYS570AI) - AI and Physics
--   [PHYS 630](https://github.com/ralphrazzouk/transcript/phd/y1/spring/PHYS630) - Advanced Electricity and Magnetism I
--   [PHYS 661](https://github.com/ralphrazzouk/transcript/phd/y1/spring/PHYS661) - Quantum Mechanics II
--   [PHYS 662](https://github.com/ralphrazzouk/transcript/phd/y1/spring/PHYS662) - Quantum Field Theory I
--   [MA 562](https://github.com/ralphrazzouk/transcript/phd/y1/spring/MA562) - Introduction to Differential Geometry and Topology
+-   [PHYS 570AI](./phd/y2/fall/PHYS570AI) - AI and Physics
+-   [PHYS 630](./phd/y2/fall/PHYS630) - Advanced Electricity and Magnetism I
+-   [PHYS 661](./phd/y2/fall/PHYS661) - Quantum Mechanics II
+-   [PHYS 662](./phd/y2/fall/PHYS662) - Quantum Field Theory I
+-   [MA 562](./phd/y2/fall/MA562) - Introduction to Differential Geometry and Topology
 
-# Spring 2025 (UNOFFICAL)
+## Spring 2025
 
--  PHYS 580 - Computational Physics
--  PHYS 631 - Advanced Electricity and Magnetism II
--  PHYS 663 - Quantum Field Theory II
--  PHYS 680 - General Relativity
--  MA 595 - Infinite Dimensonal Lie Algebras and Applications 
+- [PHYS 580](./phd/y2/spring/PHYS580) - Computational Physics
+- [PHYS 603](./phd/y2/spring/PHYS603) - Methods of Theoretical Physics III
+- [PHYS 663](./phd/y2/spring/PHYS663) - Quantum Field Theory II
+- [MA 572](./phd/y2/spring/MA572) - Algebraic Topology

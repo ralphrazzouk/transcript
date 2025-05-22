@@ -1,7 +1,5 @@
 # FALL 2023
 
-This semester was my first semester as a Ph.D. student in physics at Purdue University.
-
 ## PHYS 515 - Thermal and Statistical Physics
 
 In this course, we went over thermal equilibrium, ideal gases, equipartition theorem, heat, work, heat capacities, enthalpy, microstates, the second law of thermodynamics, large systems, temperature, paramagnetism, pressure, chemical potential, heat engines, refrigerators, free energy, phase transformations, Clausius-Clapeyron relation, the Boltzmann factor, Maxwell speed distribution, partition functions, the Gibbs factor, bosons, fermions, degenerate Fermi gases, photon gas, blackbody radiation, and the Debye theory of solids.

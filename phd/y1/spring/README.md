@@ -1,7 +1,5 @@
 # SPRING 2024
 
-This semester was my second semester as a Ph.D. student in physics at Purdue University.
-
 ## ASTR 562 - High-Energy Astrophysics
 
 In this course, we went over astronomical detectors, radiation and particles, stars, supernovae, pulsars, accretion, binaries, active galactic nuclei (AGN), gamma ray bursts (GRB), clusters, and dark matter.
