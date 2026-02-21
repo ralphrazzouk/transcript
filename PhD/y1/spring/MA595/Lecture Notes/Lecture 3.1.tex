@@ -1,0 +1,386 @@
+\documentclass{article}
+
+\usepackage{mathptmx,fullpage}
+\usepackage{amssymb,amsmath,amsthm}
+\usepackage{framed}
+
+\newtheorem{thm}{Theorem}
+\newtheorem*{dfn}{Definition}
+\newtheorem{cor}[thm]{Corollary}
+\newtheorem{lem}[thm]{Lemma}
+\newtheorem*{note}{Note}
+\newtheorem*{remark}{Remark}
+
+
+\newcommand{\ket}[1]{|#1\rangle}
+\newcommand{\bra}[1]{\langle#1|}
+\newcommand{\braket}[2]{\langle#1|#2\rangle}
+\newcommand{\norm}[1]{\left\lVert #1 \right\rVert}
+\newcommand{\bbC}{\mathbb{C}}
+\newcommand{\calH}{\mathcal{H}}
+\newcommand{\qbit}{\bbC^2}
+\newcommand{\qbits}[1]{(\qbit)^{\otimes #1}}
+
+\DeclareMathOperator{\poly}{poly}
+
+\begin{document}
+
+\noindent
+\fbox{
+	\parbox{\linewidth}{
+		\vspace{-.3cm}
+{\bf \Large \begin{center}
+CS 593/MA 592 - Intro to Quantum Computing \\
+Spring 2024 \\
+Tuesday, January 23 - Lecture 3.1
+\end{center}}
+Today's scribe: Eduardo 
+	}
+}
+
+\vspace{.3cm}
+
+\noindent {\bf Reading:} Subsection 2.2 of Nielsen and Chuang. 
+
+\
+
+\noindent{\bf Agenda:}
+\begin{enumerate}
+     \item Projective measurements
+     \item Quantum state tomography
+     \item Distinguishing states
+     \item Uncertainty principle
+     \item Global phases and complex projective space
+\end{enumerate}
+
+\section{Projective measurements (Born rule)}
+Last time we saw that a projective measurement is a self-adjoint 
+operator, i.e., $$ M^* = M.$$ Thus, we can write
+its spectral decomposition $$M = \sum_i \lambda_i P_i,$$
+where $\lambda_i$ are the distinct eigenvalues and $P_i$ are 
+the orthogonal projections onto the $\lambda_i$ subspace. 
+
+The outcomes of this
+measurement are the $\lambda_i$ eigenvalues. The probability
+of seeing these eigenvalues given that we are on a state $\ket \psi$ are
+
+\begin{equation}
+     \label{eq:proj-prob}
+     \mathrm{Pr} (\lambda_i | \ket{\psi})  = 
+                                             \frac{\braket{\psi | P_i}{\psi}}
+                                                  {\braket{\psi}{\psi}}
+\end{equation}
+which is basically the normalized size of $\ket \psi$ on the $\lambda_i$ eigenspace.
+
+\paragraph{Examples.}
+Measuring in the computational basis of $n$ qubits 
+\begin{enumerate}
+     \item
+          Let $\mathcal H = \left( \mathbb C^2 \right)^{\otimes n}$ and
+           $M = \sum^{2^n - 1}_{b=0} b \ket b \bra b$.
+          
+          Observe that if $n = 1$
+          $$M = 
+          \begin{bmatrix}
+               0 & 0 \\ 0 & 1
+          \end{bmatrix},
+          $$
+          
+          and if $n = 2$
+          
+          $$M = 
+          \begin{bmatrix}
+               0 & 0 & 0 & 0 \\ 
+               0 & 1 & 0 & 0 \\
+               0 & 0 & 2 & 0 \\
+               0 & 0 & 0 & 3
+          \end{bmatrix}.
+          $$
+          Note that $M$ is already diagonal in the computational basis.
+          The outcomes if we measure $M$ are its eigenvalues, i.e., 
+          $$\{ 0, 1, 2, \dots, 2^n -1\}.$$
+          
+          What is $\mathrm{Pr}(i | \ket{\psi})$ 
+          if $\ket \psi = \sum_{i} z_i \ket i \neq \vec 0$?
+          By applying Equation (\ref{eq:proj-prob}) we get
+          
+          \begin{equation}
+               \label{eq:proj-prob-amp}
+               \mathrm{Pr}(i | \ket \psi) = \frac{z_i z^{*}_{i} }{\sum_{j} z_j z^{*}_j}.
+          \end{equation}
+
+     \item
+          Suppose $n=1$ and
+          $$ \ket \psi  = \frac{3 \ket 0 - i \ket 1}{\sqrt 7}.$$
+          
+          Then, by applying Equation (\ref{eq:proj-prob-amp}) we get
+          \begin{align*}
+               \mathrm{Pr}( 0 | \ket \psi)  &= \frac{ \frac{3 \cdot 3^*}{7} }
+                                               {\left( \frac{3}{\sqrt 7} \right) 
+                                              \left( \frac{3}{\sqrt 7} \right)  + 
+                                             \left( \frac{-i}{\sqrt 7}\right) 
+                                             \left( \frac{i}{\sqrt 7} \right)}\\
+                                            &= \frac{\frac{9}{7}}
+                                                    {\frac{9}{7} + \frac{1}{7}} \\
+                                            &= \frac{9}{10}.
+          \end{align*}
+          
+          Note that we get for free 
+          \begin{align*}
+               \mathrm{Pr(1 | \ket \psi)} &= 1 - \mathrm{Pr(0 | \ket \psi)}\\
+                                          &= \frac{1}{10}
+          \end{align*}
+          by the complement rule.
+          
+          \begin{remark}
+               We should stress that the measurement together with the state induces
+               a probability distribution on the set of all bit strings that 
+               is entirely determined by the amplitudes of $z_i$ 
+               by Equation (\ref{eq:proj-prob-amp}).
+          \end{remark}
+
+     \item
+          Recall from last class that 
+          $$ H^{\otimes n}\ket{0\dots 0} = \left( \frac{1}{\sqrt 2}\right )^n
+                                             \sum^{2^n - 1}_{b=0} \ket b, $$
+          where $H$ is the Hadamard operator.
+          
+          In particular,
+          $$ \mathrm{Pr}(i | \ket \psi) = \frac{1}{2^n},$$
+          where $\ket \psi = \ket{0 \dots 0}$.
+          
+          Now let $\theta_0, \dots, \theta_{2^n - 1} \in \mathbb R$, 
+          and define 
+          $$ \ket{\psi(\theta_0, \dots, \theta_{2^n-1})} 
+             = \frac{1}{2^{n/2}} \sum^{2^n-1}_{b=0}e ^{2 \pi j \theta_b} \ket b.$$
+          
+          Note that $$ \ket{\psi(\theta_0, \dots, \theta_{2^n-1})} \neq \ket \psi,$$
+          but it turns out that 
+          $$ \mathrm{Pr}(i | \ket{\psi (\vec \theta)}) = \mathrm{Pr}(i | \ket \psi).$$
+          Thus, if we measure in the computational basis we get the same probability
+          distribution, even though the states are different.
+          This means that there is more to a quantum state than 
+          just the probability distribution
+          on bit strings we get by measuring in the computational basis.
+\end{enumerate}
+
+\section{Quantum state tomography}
+Quantum state tomography is the procedure of experimentally
+determining an unknown quantum state.
+The challenge lies in the inherently probabilistic nature 
+of observations in quantum systems,
+where a single copy of a state $\ket \psi$ can only give us one sample of
+its distribution.
+How many copies of $\ket \psi$ do we need to learn something non-trivial 
+about its amplitudes (in computational basis) with high confidence?
+
+This is not so different from the problem of estimating
+the probability of outcomes in an unfair coin.
+In particular, how many times do we need to flip the coin
+to get an approximation of the probability of getting heads or tails?
+We can never be certain that we have the best approximation 
+for such probabilities, but we can approach an accurate 
+estimation within a certain confidence interval.
+
+One might also ask: Is possessing a biased coin equivalent 
+to knowing its bias? Or, does the coin ``know'' its own bias? 
+We can argue that knowing the bias is not inherent 
+in the coin; it requires experimentation to extract this 
+information, and even then, it's determined 
+only within a certain confidence interval.
+
+In other words, having a quantum state $\ket \psi = \sum z_i \ket i$ 
+and not knowing the amplitudes $z_i$ is similar to having 
+a biased coin and not knowing what the bias is.
+
+\section{Distinguishing quantum states}
+Suppose $\ket \psi, \ket \phi \in \mathcal H$, where $\mathcal H \cong \mathbb C^d$.
+
+\paragraph{Question:} 
+Is there a (projective) measurement we can perform to distinguish $\ket \psi$
+from $\ket \phi$ with certainty in ``one shot'' ?
+
+\paragraph{Answer:}
+Yes, if and only if $\braket{\phi}{\psi} = 0$, i.e.,
+the states are orthogonal. We will prove this statement.
+
+($\Leftarrow$) 
+Let 
+$$ M = \underbrace{\ket \psi \bra \psi}_{P_1} + 
+   2 \underbrace{\ket \phi \bra \phi}_{P_2}.$$ 
+Observe that $M$ is already written in its spectral form. 
+If we perform a projective measurement of $M$ on a state $\ket x$ that
+is equal to either $\ket \phi$ or $\ket \psi$ (we will
+assume that both states are already normalized), then
+\begin{align*}
+     \mathrm{Pr}(1 | \ket x)    &= \braket{x | P_1}{x} \\
+                                &= \begin{cases} 
+                                        1, & \text{if } \ket x = \ket \psi, \\
+                                        0, & \text{if } \ket x = \ket \phi,
+                                   \end{cases}
+\end{align*}
+and
+\begin{align*}
+     \mathrm{Pr}(2 | \ket x) &= \braket{x | P_2}{x} \\
+                             &= \begin{cases} 
+                                   0, & \text{if } \ket x = \ket \psi, \\
+                                   1, & \text{if } \ket x = \ket \phi.
+                                \end{cases}
+\end{align*}
+Thus, performing this measurement will tell us with certainty
+what $\ket x$ is\footnote{Note that $\lambda =0$ is also an eigenvalue 
+of $M$, but since $\ket x \in \{ \ket \psi, \ket \phi\}$ we will 
+never observe this outcome}.
+
+We should note that this is a ``bad'' answer in the sense that we need to know
+what states are. Thus, this answer is more informational-theoretic than
+algorithmic.
+
+($\Rightarrow$) By contradiction suppose that $\braket{\phi}{\psi} \neq 0$
+and $M$ is an observable with two distinguished outcomes ``1'' and ``2''
+such that 
+$$ \mathrm{Pr}(1 | \ket \psi) = 1,$$
+$$ \mathrm{Pr}(2 | \ket \psi) = 0,$$
+$$ \mathrm{Pr}(1 | \ket \phi) = 0,$$
+and
+$$ \mathrm{Pr}(2 | \ket \phi) = 1.$$
+Then, $$ M|_{\mathrm{span} \{ \ket \phi, \ket \psi\}} = 1 \cdot P_1 + 2 \cdot P_2$$
+for some projectors $P_1$ and $P_2$. 
+Note 
+\begin{align*}
+     P_1 + P_2 &= I \\
+               &= I_{\mathrm{span}\{ \ket \phi, \ket \psi\}}.
+\end{align*}
+
+Applying the Born rule,
+$$ \mathrm{Pr}(1 | \ket \psi) = \braket{\psi | P_1}{\psi},$$
+$$ \mathrm{Pr}(2 | \ket \psi) = \braket{\psi | P_2}{\psi},$$
+$$ \mathrm{Pr}(1 | \ket \phi) = \braket{\phi | P_1}{\phi}$$
+and
+$$ \mathrm{Pr}(2 | \ket \phi) = \braket{\phi | P_2}{\phi}.$$
+Write $$ \ket \phi = \alpha \ket \psi + \beta \ket{\psi^{\perp}},$$
+where $\braket{\psi}{\psi^{\perp}} = 0$, and $|\alpha|^2 + |\beta|^2 = 1$,
+$\beta \neq 0$ and $\alpha \neq 0$.  
+Then,
+\begin{align*}
+     1 &= \braket{\phi | P_2}{\phi} \\
+       &= (\alpha^*\bra \psi + \beta^* \bra{\psi^{\perp}}) 
+          P_2 (\alpha \ket \psi + \beta \ket{\psi^{\perp}}) \\
+       &= \alpha^* \alpha \underbrace{\braket{\psi | P_2}{\psi}}_{0} + 
+       \beta^* \beta 
+       \underbrace{\braket{\psi^{\perp} | P_2}{\psi^{\perp}}}_{1}
+\end{align*}
+Thus, $|\beta^* \beta| = 1$, which implies $\alpha = 0$. 
+This contradicts our assumption $\braket{\psi}{\phi} \neq 0$.
+
+Note the contrast with the $\Leftarrow$ direction, where
+knowing what the states were allowed us to build a measurement
+$M$ from which we can distinguish the states with certainty. 
+Here, even knowing the states, there is no way
+to distinguish the states with certainty due to the non-orthogonality
+between $\ket \psi$ and $\ket \phi$.
+
+\section{Uncertainty principle}
+
+Projective measurements have a very clean formula for 
+expectation values (i.e., averages).
+\begin{align*}
+     \mathbb E(M | \ket \psi) &= \sum_{\lambda \text{is eigenvalue of $M$}} 
+                                 \lambda \mathrm{Pr}(\lambda | \ket \psi) \\
+                              &= \sum_{\lambda} \lambda \braket{\psi | P_{\lambda}}{\psi} \\
+                              &= \bra{\psi} 
+                                 \left( \sum_{\lambda} \lambda P_{\lambda}
+                                 \right)
+                                 \ket{\psi} \\
+                              &= \braket{\psi | M}{\psi}
+\end{align*}
+
+In particular, we don't need to know spectral decomposition of $M$ to compute
+$$ \mathbb E (M | \ket \psi) = \braket{\psi | M}{\psi}.$$
+
+Sometimes, when $\ket \psi$ is understood, we write 
+$$ \langle M \rangle \mathrel{:=} \mathbb E (M \ket \psi).$$
+
+From this,
+\begin{align*}
+     \mathrm{Var}(M)_{\ket \psi} &= \mathrm{Var} (M) \\
+                                 &= \mathbb E 
+                                    \left[ M - \left(\mathbb E(M)\right)^2\right]\\
+                                 &= \mathbb E(M^2) - (\mathbb E(M))^2\\
+                                 &= \langle M^2 \rangle - \langle M \rangle^2
+\end{align*}
+
+Thus, the standard deviation is 
+$$ \Delta (M) = \Delta(M)_{\ket \psi} = \sqrt {\mathrm{Var}(M)}.$$
+\begin{note}
+     $\Delta(M)_{\ket \psi} = 0$ if and only if $\ket \psi$ is an 
+     eigenvector of $M$.
+\end{note}
+
+\begin{framed}
+\underline{Heisenberg uncertainty principle}:
+\begin{quote}
+     \textit{ For all observables $A$ and $B$,
+          $$ \Delta(A)_{\ket \psi} \Delta(B)_{\ket \psi} 
+               \geq \frac{1}{2} \braket{\psi|[A, B]}{\psi}.$$
+          }
+\end{quote}
+     
+\end{framed}
+
+Intuitively, this is saying that if we want the product of 
+the two standard deviations of two operators to be small, then 
+they should be very close to commuting on state $\ket \psi$.
+
+\begin{remark}
+     This statement is not saying
+     that performing one measurement affects the outcome of another.
+\end{remark}
+
+In particular, one can only be ever certain about the outcomes of both
+$A$ and $B$ on $\ket \psi$ if they ``commute on $\ket \psi$''.
+Note that if we are certain about the outcomes
+of $A$ and $B$, then $\Delta (A)|_{\ket \psi} = \Delta (B)_{\ket \psi} = 0$.
+This means that $\ket \psi$ is an eigenvector of both $A$ and $B$, and thus
+$[A, B]\ket \psi = 0$.
+
+\section{Global phases and complex projective space}
+
+Global phases don't matter. That is, if $\ket \phi = z \ket \psi$ for
+some $z \in \mathbb C - \{ 0 \}$, then there is no measurement that can 
+distinguish $\ket \phi$ from $\ket \psi$, and so, we should consider
+$\ket \phi$ and $\ket \psi$ as the same state \footnote{In particular,
+this is why we don't care about normalization because normalization is
+just multiplying by a non-zero scalar.}.
+
+Let $M = \sum \lambda P_{\lambda}$ be any projective measurement.
+Then,
+\begin{align*}
+     \mathrm{Pr}(\lambda | \ket \phi) &= \frac{\braket{\phi | P_{\lambda}}{\phi}}
+                                         {\braket{\phi}{\phi}} \\
+                                      &= \frac{(z^* \bra \psi) P_{\lambda} (z \ket \psi)}
+                                              {(z^* \bra \psi) (z \ket \psi)} \\
+                                      &= \frac{\braket{\psi P_{\lambda}}{\psi}}
+                                              {\braket{\psi}{\psi}} \\
+                                      &= \mathrm{Pr}(\lambda | \ket \psi).
+\end{align*}
+Thus, if these two distributions are always the same whenever we perform a measurement
+no matter what the measurement is, it makes sense to regard them as being the same 
+state.
+
+If we consider a qudit $\mathbb C^d$, we have said that $\mathbb C^d - \{ 0 \}$
+is the space where quantum states are allowed to be. Now we are also saying
+that two different states that differ by some scalar factor are the same.
+This means that what really parametrizes quantum states (and that does so
+in a one-to-one manner) is the quotient 
+$\mathbb C^d - \{ 0 \} / \mathbb C - \{ 0 \}$, which is exactly
+the projective space $\mathbb C \mathbb P^{d-1}$, i.e.,
+$$ \mathbb C^d - \{ 0 \} / \mathbb C - \{ 0 \} \cong \mathbb C \mathbb P^{d-1}.$$
+Note that $\bbC\mathbb{P}^{d-1}$ is essentially the 
+set of lines of complex lines in $\mathbb C^d$.
+
+Thus, the set of pure states is in fact bijective with the complex projective space.
+In particular, when $d=2$, $\mathbb C \mathbb P^{1}$ is homeomorphic
+and isometric with the two dimensional sphere that is called that 
+Bloch sphere.
+\end{document}

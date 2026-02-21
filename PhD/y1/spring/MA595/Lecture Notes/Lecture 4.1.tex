@@ -1,0 +1,385 @@
+\documentclass{article}
+
+\usepackage{mathptmx,fullpage}
+\usepackage{amssymb,amsmath,amsthm}
+\usepackage{framed}
+\usepackage{tikz}
+\usepackage{quantikz}
+\usepackage{dutchcal}
+
+\newtheorem{thm}{Theorem}
+\newtheorem*{dfn}{Definition}
+\newtheorem{cor}[thm]{Corollary}
+\newtheorem{lem}[thm]{Lemma}
+\newtheorem*{note}{Note}
+\newtheorem*{remark}{Remark}
+\newtheorem*{claim}{Claim}
+\newtheorem*{example}{Example}
+
+
+\newcommand{\ket}[1]{|#1 \right\rangle}
+\newcommand{\bra}[1]{\left\langle #1|}
+\newcommand{\braket}[2]{\left\langle #1 | #2 \right\rangle}
+\newcommand{\braketmatrix}[3]{\left\langle #1 \left| #2 \right| #3 \right\rangle}
+\newcommand{\norm}[1]{\left\lVert #1 \right\rVert}
+\newcommand{\bbC}{\mathbb{C}}
+\newcommand{\calH}{\mathcal{H}}
+\newcommand{\qbit}{\bbC^2}
+\newcommand{\qbits}[1]{(\qbit)^{\otimes #1}}
+
+\newcommand{\AxisRotator}[1][rotate=0]{%
+    \tikz [x=0.15cm,y=0.40cm,line width=.21ex,-stealth,#1] \draw (0,0) arc (-150:150:1 and 1);%
+}
+
+\DeclareMathOperator{\poly}{poly}
+
+\begin{document}
+
+    \noindent
+    \fbox{
+    	\parbox{\linewidth}{
+    		\vspace{-.3cm}
+            {\bf \Large 
+            \begin{center}
+                CS 593/MA 592 - Intro to Quantum Computing \\
+                Spring 2024 \\
+                Tuesday, January 30 - Lecture 4.1
+            \end{center}
+            }
+            Today's scribe: Ralph Razzouk 
+    	}
+    }
+
+    \vspace{.3cm}
+    \noindent {\bf Reading:} Subsection 4.1-4.5.3 of Nielsen and Chuang. 
+
+\
+
+    \noindent{\bf Agenda:}
+    \begin{enumerate}
+         \item Universal gate sets
+         \item Approximating unitaries and universality
+         \item Single qubit gates
+         \item ``Two-level'' unitaries 
+         \item $\{ H, T, CNOT \}$ universal gate set
+    \end{enumerate}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%% LECTURE NOTES START %%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{remark}
+    3-ary quantum gates $\mathcal{g} = U \left( 2^3 \right)$ were sufficient to encode all Boolean functions in quantum circuits. This is an overkill. In fact
+    \begin{equation*}
+        \mathcal{g} = \{ \text{permutations of computational basis} \} \simeq S_8.
+    \end{equation*}
+
+    Permutations in the computational basis are enough to encode all classical calculations `quantumly', but not all unitaries, even just approximately.
+\end{remark}
+
+Our goal today will be to fix this system, showing that the gate set $\mathcal{g} = \{ H, T, CNOT \}$ is enough.
+
+\section{Approximating Unitaries and Universality}
+    A discrete set of gates can't be used to implement an arbitrary unitary operation \textit{exactly}, since the set of unitary operations is continuous. Rather, it turns out that a discrete set can be used to \textit{approximate} any unitary operation. To understand how this works, we first need to study what it means to approximate a unitary operation. Suppose $U$ and $V$ are two unitary operators on any Hilbert Space $\mathcal{H}$ (e.g. $\mathcal{H} = \left( \mathbb{C}^2 \right) ^{\otimes k}$, where $U$ is the target unitary operator that we wish to implement, and $V$ is the unitary operator that is actually implemented in practice. We define the error when $V$ is implemented instead of $U$ by
+    \begin{equation*}
+        E(U, V) 
+        := || U - V || 
+        := \sup_{\ket{\psi} \neq 0}{ \frac{||(U-V) \ket{\psi} ||}{|| \ket{\psi} ||} }
+        = \sup_{||\ket{\psi}|| = 1}{ ||(U-V) \ket{\psi} || },
+    \end{equation*}
+    where the supremum is taken over all normalized quantum states $\ket{\psi}$ in the state space.
+    
+    For any projective measurement, we have $A = A^\ast = \sum_\lambda \lambda P_\lambda$. Then
+    \begin{align*}
+        \left| P_U - P_V \right|
+        & = \left| \braketmatrix{\psi}{ U^\ast P_\lambda U}{\psi} - \braketmatrix{\psi}{ V^\ast P_\lambda V}{\psi} \right| \\
+        & = \left| \braketmatrix{\psi}{ U^\ast P_\lambda (U - V)}{\psi} - \braketmatrix{\psi}{ (U^\ast - V^\ast) P_\lambda V}{\psi} \right| \\
+        & \leq || (U - V) \ket{\psi} || + || (U - V) \ket{\psi} || \quad \quad (\text{Cauchy-Schwarz inequality}) \\
+        & \leq 2 E(U , V).
+    \end{align*}
+
+    Thus, when $E(U, V)$ is small, then measurement outcomes occur with similar probabilities, regardless of whether $U$ or $V$ were performed.
+
+    Moreover,
+    \begin{align*}
+        E( U_2 U_1, V_1 V_2)
+        & = \sup_{||\ket{\psi}|| = 1}{ ||(U_2 U_1 - V_1 V_2) \ket{\psi} || } \\
+        & = \sup_{||\ket{\psi}|| = 1}{ ||(U_2 U_1 - V_2 U_1) \ket{\psi} + (V_2 U_1 - V_1 V_2) \ket{\psi} || } \\
+        & \leq \sup_{||\ket{\psi}|| = 1}{ ||(U_2 U_1 - V_2 U_1) \ket{\psi}|| } + \sup_{||\ket{\psi}|| = 1}{||(V_2 U_1 - V_1 V_2) \ket{\psi} || } \\
+        & = E(U_2, V_2) + E(U_1, V_1).
+    \end{align*}
+
+    Inductively, we have
+    \begin{equation*}
+        E( U_m U_{m-1} \cdots U_2 U_1, V_m V_{m-1} \cdots V_2 V_1 ) \leq \sum_{i = 1}^m E(U_i, V_i).
+    \end{equation*}
+
+    The take-away from this is that if we want to approximate unitaries that are a composition of gates over a ``big'' gate set using a ``small'' gate set, it suffices to approximate them individually.
+
+    \begin{dfn}
+        A gate set $\mathcal{g}$ is universal if
+        \begin{equation*}
+            \forall k \in \mathbb{N}, \forall U \in U \left( 2^k \right) \land \forall \epsilon > 0, \exists \text{ circuit } C \text{ over } \mathcal{g} \text{ on } k + \ell \text{ qubits } ( \ell \text{ ancillas})
+        \end{equation*}
+        such that:
+            \begin{itemize}
+                \item 
+                \begin{equation*}
+                    \left. C \, \right|_{\left( \mathbb{C} ^2 \right)^{\otimes k} \otimes \ket{0 \cdots 0}} = \left( \mathbb{C} ^2 \right)^{\otimes k} \otimes \ket{0 \cdots 0} \simeq \left( \mathbb{C} ^2 \right)^{\otimes k}
+                \end{equation*}
+
+
+                \item 
+                \begin{equation*}
+                    E \left( U_1 , \left. C \, \right|_{\left( \mathbb{C} ^2 \right)^{\otimes k} \otimes \ket{0 \cdots 0}} \right) < \epsilon
+                \end{equation*}
+            \end{itemize}
+    \end{dfn}
+
+    Our goal will be to show that $\mathcal{g} = \{ H, T, CNOT \}$ is universal, even without any ancillas.
+
+
+
+
+
+
+\section{Single Qubit States}
+    \begin{equation*}
+        U(2) \rightarrow U(2)/\text{global phases} \equiv PU(2) \simeq SO(3)
+    \end{equation*}
+    \begin{equation*}
+        \mathbb{C}^2 - \{ 0 \} \rightarrow \mathbb{C}^2 - \{ 0 \} / \text{global phases} \equiv \mathbb{C} \mathbb{P}^1 \simeq S^2 \quad \text{(Fubiny study metric)}
+    \end{equation*}
+
+    In other words, up to unimportant global phases, single qubit gates act like rotations of $S^2$, which we call the Bloch sphere.
+
+    \begin{center}
+        \begin{tikzpicture}
+            % Define radius
+            \def\r{3}
+            
+            % Bloch vector
+            \draw (0,0) node[circle, fill, inner sep=1] (orig) {} -- (\r/2,\r/3)
+            node[circle, fill, inner sep=0.7, label=above:$\ket{\psi}$] (a) {};
+            \draw[dashed] (orig) -- (\r/2, -\r/5) node (phi) {} -- (a);
+            
+            % Sphere
+            \draw (orig) circle (\r);
+            \draw[dashed] (orig) ellipse (\r{} and \r/3);
+            
+            % Axes
+            \draw (orig) ++(\r/0.9, 0) node[below] {$\ket{+}$};
+            \node at (\r, 0) [circle, fill, inner sep=1.5pt]{};
+            \draw[->] (orig) -- ++(\r/0.8, 0) node[right] (x) {$x$};
+            
+            \draw (orig) ++(-\r/6, -\r/3) node[below] {$\ket{i}$};
+            \node at (-\r/5, -\r/3) [circle, fill, inner sep=1.5pt]{};
+            \draw[->] (orig) -- ++(-\r/3.2, -\r/2) node[below] (y) {$y$};
+            
+            \draw (orig) ++(0, \r/0.9) node[left] {$\ket{0}$};
+            \node at (0, \r) [circle, fill, inner sep=1.5pt]{};
+            \draw[->] (orig) -- ++(0, \r/0.8) node[above] (z) {$z$};
+
+
+            \draw (orig) ++(-\r/0.9, 0) node[below] {$\ket{-}$};
+            \node at (-\r, 0) [circle, fill, inner sep=1.5pt]{};
+            
+            \draw (orig) ++(\r/6, \r/3) node[above] {$\ket{-i}$};
+            \node at (\r/5, \r/3) [circle, fill, inner sep=1.5pt]{};
+            
+            \draw (orig) ++(0, -\r) node[below] {$\ket{1}$};
+            \node at (0, -\r) [circle, fill, inner sep=1.5pt]{};
+            
+        \end{tikzpicture}
+    \end{center}
+
+    \begin{claim}
+        Let $A, B \in SO(3)$ with $|A| = |B| = \infty$ (i.e. $A^k \neq Id$ for any $k > 0$, similar for $B$). We want $[ A, B] \neq 0$ so that we do not have redundancies. Then the subgroup of $SO(3)$ generated by $A$ and $B$, denoted by $\langle A, B \rangle \leq SO(3)$ is dense.
+    \end{claim}
+    \begin{proof}{Idea of proof:}
+        $A, B$ are rotations of infinite order. Let $\ell_A$ and $\ell_B$ be their rotation axes. Since $|A| = |B| = \infty$, then their rotation angles $\theta_A$ and $\theta_B$ must be irrational multiples of $2 \pi$. Moreover, since $[A, B] \neq 0$, then $\ell_A$ and $\ell_B$ are distinct.
+    \end{proof}
+
+    \begin{center}
+        \begin{tikzpicture}
+            % Define radius
+            \def\r{2}
+
+            
+            % Sphere
+            \draw (0,0) node[circle, fill, inner sep=1] (orig) {};
+            \draw (orig) circle (\r);
+            \draw[dashed] (orig) ellipse (\r{} and \r/3);
+            
+            % l_A
+            \draw[-] (orig) -- ++(0, -\r/0.8) node[xshift=1.25ex]  {\AxisRotator[rotate=-90] $\theta_A$};
+            \draw[->] (orig) -- ++(0, \r/0.8) node[above] {$\ell_A$};
+
+            % l_B
+            \draw[-] (orig) -- ++(-\r, -\r/2) node[xshift=0.9ex, yshift=-0.7ex]  {\AxisRotator[rotate=-140] $\theta_B$};
+            \draw[->] (orig) -- ++(\r, \r/2) node[right] {$\ell_B$};
+        \end{tikzpicture}
+    \end{center}
+
+    Theorem 4.1 in the book shows that every element of $SO(3)$ can be written as
+    \begin{equation*}
+        R_y(\theta_3) R_z(\theta_2) R_y(\theta_1).
+    \end{equation*}
+    Thus, it suffices to show that, for any $\epsilon > 0$, we can find $w \in \langle A, B \rangle$ such that the axis of $w$ is within $\epsilon$ of being orthogonal to $\ell_A$ and $w$ has infinite order. In fact, the only two-generated subgroups of $SO(3)$ that are infinite and not dense are abelian with a constant rotation axis or ``infinite dihedral'' (i.e. any non-dense infinite subgroup preserves a plane).
+
+
+    \begin{cor}
+        $\langle H, T \rangle$ is dense in $PU(2) \approx SO(3)$.
+    \end{cor}
+    \begin{proof}
+        Let $A = THTH$ and $B = HTHT$, then read the book.
+    \end{proof}
+
+    \begin{note}
+        1-qubit gates will never be universal.
+    \end{note}
+
+
+\section{Two-Level Unitaries}
+    \begin{dfn}
+        A two-level unitary on $k$ qubits is a unitary
+        \begin{equation*}
+            U: \left( \mathbb{C} ^2 \right)^{\otimes k} \rightarrow \left( \mathbb{C} ^2 \right)^{\otimes k}
+        \end{equation*}
+        that acts non-trivially on at most two computational basis vectors (i.e. up to permuting rows and columns by the same permutations)
+        \begin{equation*}
+            U = 
+            \begin{pmatrix}
+                \Tilde{U} & 0 \\
+                0 & \mathbb{I}_{2^n - 1}
+            \end{pmatrix}.
+        \end{equation*}
+    \end{dfn}
+
+    \begin{example}
+        \begin{equation*}
+            U = 
+            \begin{pmatrix}
+                a & 0 & \cdots & 0 & c \\
+                0 &&&& 0 \\
+                0 && \mathbb{I} && 0 \\
+                 0 &&&& 0 \\
+                b & 0 & \cdots & 0 & d 
+            \end{pmatrix}
+        \end{equation*}
+        where $\begin{pmatrix}
+            a & c \\
+            b & d
+        \end{pmatrix}$ is unitary.
+    \end{example}
+
+
+    \begin{claim}
+        $\mathcal{g} = \{ $ all $k$-qubit 2-level unitaries $/ k \in \mathbb{N} \}$ is universal.
+    \end{claim}
+
+    A high-brow explanation is as follows. We need to key facts:
+    \begin{itemize}
+        \item 
+        Every unitary can be written as $U = \exp{iH}$, where $H$ is Hermitian.
+
+        \item 
+        Trotter product formula
+        \begin{equation*}
+            \exp{(i \left( A + B \right))} = \lim_{n \rightarrow \infty} \left[ \exp{\left( \frac{iA}{n} \right)} + \exp{\left( \frac{iB}{n} \right)} \right].
+        \end{equation*}
+    \end{itemize}
+
+    \begin{proof}
+        Let $U$ be a unitary on $n$-qubits, i.e. $U \in U \left( 2^n \right)$. Write $U = \exp{(iH)}$ for some Hermitian $H: \left( \mathbb{C} ^2 \right)^{\otimes n} \rightarrow \left( \mathbb{C} ^2 \right)^{\otimes n}$. Define, for all $0 \leq \ell \leq k \leq 2^n - 1$
+        \begin{align*}
+            E_{\ell, k} & =
+            \begin{pmatrix}
+                0 && 1 \\
+                & \ddots \\
+                1 && 0
+            \end{pmatrix}, \text{ if } \ell < k, \\
+            E_{\ell} = E_{\ell, \ell} & = 
+            \begin{pmatrix}
+                0 && \\
+                & \ddots \\
+                && 0
+            \end{pmatrix}, \\
+            F_{\ell, k} & =
+            \begin{pmatrix}
+                0 && -i \\
+                & \ddots \\
+                i && 0
+            \end{pmatrix}.
+        \end{align*}
+        noticing that $\text{span}_\mathbb{R} \{ E_{\ell, k}, F_{\ell, k} \} = \{ \text{all Hermitians} \}$. We now write
+        \begin{equation*}
+            H = \sum_{0 \leq \ell \leq k \leq 2^k - 1} r_{\ell, k} E_{\ell, k} +  \sum_{0 \leq \ell \leq k \leq 2^k - 1} s_{\ell, k} F_{\ell, k},
+        \end{equation*}
+        where $r_{\ell, k}, s_{\ell, k} \in \mathbb{R}$.
+
+        Trotter's formula shows that we can approximately implement $\exp{(i (A + B))}$ any time we can (exactly) implement $\exp{\left( \frac{iA}{n} \right)}$ and $\exp{\left( \frac{iB}{n} \right)}$, for all $n$.
+
+        Inductively, we can see that, to implement $U$ approximately, it suffices to implement $\exp{\left( i\frac{r_{\ell, k} E_{\ell, k}}{n} \right)}$ and $\exp{\left( i\frac{s_{\ell, k} f_{\ell, k}}{n} \right)}$ (exactly) for all $n$ by two-level unitaries. Well, these two \textbf{are} two-level unitary matrices.
+    \end{proof}
+
+
+\section{$\{ H, T, CNOT \}$ Universtal Gate Set}
+    \begin{claim}
+        $\mathcal{g} = \{ H, T, CNOT \}$ is universal.
+    \end{claim}
+    \begin{proof}
+        By our previous work, it suffices to approximate every two-level unitary by a quantum circuit built out of arbitrary 1-qubit gates and CNOT (\S 4.3, \S 4.4 are mostly about this).
+    \end{proof}
+
+    Recall that CNOT (a.k.a C-X) is
+    \begin{center}
+        \begin{quantikz}
+            \lstick{$\ket{x_2}$} & \ctrl{1} & \rstick{$\ket{x_2}$} \\
+            \lstick{$\ket{x_1}$} & \targ{} & \rstick{$\ket{x_1 \oplus x_2}$}
+        \end{quantikz}
+    \end{center}
+    also written as
+    \begin{center}
+        \begin{quantikz}
+            & \gate[2]{CX} &\\
+            &&
+        \end{quantikz}.
+    \end{center}
+
+    More generally, for any unitary $U: \mathbb{C}^2 \rightarrow \mathbb{C}^2$,
+    \begin{align*}
+        CU : \mathbb{C}^2 \otimes \mathbb{C}^2 & \rightarrow \mathbb{C}^2 \otimes \mathbb{C}^2 \\
+        \ket{0} \otimes \ket{x} & \mapsto \ket{0} \otimes \ket{x} \\
+        \ket{1} \otimes \ket{x} & \mapsto \ket{1} \otimes \left( U\ket{x} \right).
+    \end{align*}
+
+    \begin{example}
+        \begin{equation*}
+            U =
+            \begin{pmatrix}
+                a && c \\
+                & \mathbb{I} & \\
+                b && d \\
+            \end{pmatrix}
+            \quad \quad \text{on 3-qubits ($8\times8$ matrix)}
+        \end{equation*}
+
+        $U$ acts non-trivially only on $\ket{000}$ and $\ket{111}$. So, we should build a circuit (over 1-qubit gates and CNOTs) that approximates $U$.
+
+        \begin{equation*}
+            \Tilde{U} = 
+            \begin{pmatrix}
+                a & c \\
+                b & d
+            \end{pmatrix}
+        \end{equation*}
+        \begin{center}
+            \begin{quantikz}
+                & \octrl{1} & \octrl{1} & \gate{\tilde{U}} & \octrl{1} & \octrl{1} & \qw \\
+                & \octrl{1} & \targ{} & \ctrl{-1} & \targ{} & \octrl{1} & \qw \\
+                & \targ{} & \ctrl{-1} & \ctrl{-1} & \ctrl{-1} & \targ{} & \qw
+            \end{quantikz}
+        \end{center}
+    \end{example}
+
+\end{document}

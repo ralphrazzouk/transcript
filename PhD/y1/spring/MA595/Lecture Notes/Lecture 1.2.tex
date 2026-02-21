@@ -1,0 +1,162 @@
+\documentclass{article}
+
+\usepackage{mathptmx,fullpage}
+\usepackage{amssymb,amsmath,amsthm}
+
+\newtheorem{thm}{Theorem}
+\newtheorem*{dfn}{Definition}
+\newtheorem{cor}[thm]{Corollary}
+\newtheorem{lem}[thm]{Lemma}
+
+
+\newcommand{\ket}[1]{|#1\rangle}
+\newcommand{\bra}[1]{\langle#1|}
+\newcommand{\braket}[2]{\langle#1|#2\rangle}
+\newcommand{\bbC}{\mathbb{C}}
+\newcommand{\calH}{\mathcal{H}}
+
+\DeclareMathOperator{\poly}{poly}
+
+\begin{document}
+
+\noindent
+\fbox{
+	\parbox{\linewidth}{
+		\vspace{-.3cm}
+{\bf \Large \begin{center}
+CS 593/MA 592 - Intro to Quantum Computing \\
+Spring 2024 \\
+Thursday, January 11 - Lecture 1.2
+\end{center}}
+Today's scribe: Raghav
+	}
+}
+
+\vspace{.3cm}
+
+\noindent {\bf Reading:} Subsections 2.1.7-2.1.9 of Nielsen and Chuang.  You should also be wrapping up the front matter and Chapter 1.
+
+\
+
+\noindent{\bf Agenda:}
+\begin{enumerate}
+\item Proof of spectral theorem
+\item Examples of Hilbert spaces
+\item Pauli operators
+\end{enumerate}
+I covered less today than I intended.  In particular, I did not get to tensor products or simultaneous diagonalizability, which we will now do Tuesday before discussing the axioms of quantum mechanics.
+
+\section{Proof of spectral theorem}
+\begin{thm}
+An operator $A:\mathcal{H}\to\mathcal{H}$ is unitarily diagonalizable if and only if $A$ is normal (i.e. $AA^* = A^*A$).
+\end{thm}
+
+Let's give the sketch of the proof.  See the book for full details.  I want to explain what's going on at, hopefully, a more conceptual level.
+
+\begin{proof}
+Since this is an ``if and only if" statement, we need to prove two things.
+
+\begin{itemize}
+    \item[$\implies$] This is the easy direction. If $A$ is diagonalizable, diagonalize it. In this basis, the matrix of its adjoint is the diagonal matrix whose diagonal entries are the conjugates of the diagonal entries of $A$; then $A$ is normal because $\mathbb{C}$ is commutative.
+    \item[$\impliedby$] This is the hard direction.  We will use induction on $\dim\calH$.  (This is why we must assume $\calH$ is finite dimensional; it's worth noting that there are generalizations to the infinite dimensional setting.)
+
+	Let $\lambda$ be an eigenvalue of $A$, and let $P_\lambda$ be the orthogonal projection onto the $\lambda$-eigenspace, $E_\lambda \subseteq \mathcal{H}$.\footnote{Here, an operator $P$ is an {\em orthogonal projection} onto the subspace $E$ if $P(\mathcal{H}) = E$ and $P^2 = P^* = P$.} We can write $I_\mathcal{H} = P_\lambda + Q$ where $Q$ is the projection onto $E_\lambda^\perp$ (the orthogonal complement of $E_\lambda$).\footnote{It is possible that $E_\lambda = \mathcal{H}$ in which case $E_\lambda^\perp$ is trivial, but this implies that $A = \lambda I$, which is already diagonal in EVERY orthonormal basis!}
+    
+    Notice that $A = IAI = P_\lambda A P_\lambda + P_\lambda A Q + Q A P_\lambda + QAQ$. Since $P_\lambda$ and $Q$ are projections onto orthogonal subspaces, $P_\lambda A Q = Q A P_\lambda = 0$.
+    Now, since $\mathcal{H}$ is finite dimensional, we can proceed inductively on $\dim\mathcal{H}$.
+    When $\dim\mathcal{H}\in\{0, 1\}$, $A$ must be a scalar, which is trivially normal.
+    In the inductive case, since $\dim E_\lambda^\perp < \dim\mathcal{H}$, we know that $QAQ|_{E_\lambda^\perp}$ is unitarily diagonalizable.\footnote{The inequality is strict because $E_\lambda$ is the subspace corresponding to a honest eigenvalue, hence its dimension is at least 1.  This in turn means $E_\lambda^\perp$ has dimension at most $\dim\calH - 1$.} By a similar argument, $P_\lambda A P_\lambda |_{E_\lambda}$ is also unitarily diagonalizable (in fact, it of course just looks like $\lambda I|_{E_\lambda}$). Hence, there are orthonormal bases $\mathcal{B}_1, \mathcal{B}_2$ in which $QAQ|_{E_\lambda^\perp}$ and $P_\lambda AP_\lambda|_{E_\lambda}$, respectively, are diagonal. It is now easy to check that $\mathcal{B}_1\cup\mathcal{B}_2$ is an orthonormal basis in which $A$ is diagonal.
+
+\end{itemize}
+
+\end{proof}
+
+\section{Examples of Hilbert Spaces}
+Last time I painstakingly (painfully?) defined Hilbert spaces, but I didn't get you any examples!  Let's rectify that.
+
+\subsection{The trivial Hilbert space}
+This is trivial vector space over $\bbC$ consisting of only a zero vector.  The inner product of this vector with itself is 0.  Yawn.
+
+\subsection{$\mathbb{C}$ itself}
+Of course $\bbC$ is a vector space over $\bbC$.  Now define the inner product by $\langle z, w \rangle = z^*w$. You should check this is indeed a Hilbert space, but, also yawn.
+
+\subsection{Qubits and qudits, kets and bras}
+This is where the fun begins.
+
+A \emph{qubit} is any 2-dimensional Hilbert space.  All qubits are isomorphic to the vector space $\bbC^2$, which is often (in elementary linear algebra classes) defined as ``columns of complex numbers of length 2" with the inner product defined by the (conjugate linear) dot product:
+\[ \left\langle \begin{pmatrix} z_1 \\ z_2 \end{pmatrix} , \begin{pmatrix} w_1 \\ w_2 \end{pmatrix} \right\rangle := z_1^*w_1 + z_2^*w_2\]
+I prefer to define it a slightly different way.  But, since I can't help myself, let's do things a little more generally.
+
+A \emph{qudit} is any $d$-dimensional Hilbert space.  (Taking $d=2$ yields a qubit.)  All qudits are isomorphic to the vector space $\bbC^d$, which I will define to be the unique Hilbert space with an orthonormal basis consisting of the set of symbols $\{\ket{0},\ket{1},\dots,\ket{d-1}\}$.  We sometimes call these symbols ``kets."  More generally, any vector in any Hilbert space can be called a ``ket."\footnote{There is no definition to make here, other than to say that ``ket" is simply a synonym for vector. Bras are a different story that you will see on your homework.}
+
+More concretely, with this definition, $\bbC^d$ is the vector space consisting of (formal) linear combinations of the symbols $\ket{0},\ket{1},\dots,\ket{d-1}$.  This means a general vector---or ket---in $\bbC^d$, which I will denote by $\ket{x}$ where $x$ is some other symbol (that is, $x$ is not (necessarily) one of the indices $0,1,\dots,d-1$) looks like
+\[ \ket{x} = \sum_{i=0}^{d-1} z_i \ket{i}.\]
+where $z_i \in \bbC$.  The inner product of $\bbC^d$ is defined on the defining basis in a way that makes it orthonormal.  That is
+\[ \langle \ket{i}, \ket{j} \rangle = \delta_{ij} = \begin{cases} 0 & \text{ if } i \ne j, \\ 1 & \text{ if } i=j. \end{cases}.\]
+Since this is patently absurd notation, we will clean it up, by defining
+\[ \braket{i}{j} := \braket{\ket{i}}{\ket{j}}. \]
+This is called bra-ket notation.\footnote{Note that the ket $\ket{j}$ is the right ``half" of the bra-ket $\braket{i}{j}$.  You will make sense of the left "half" $\bra{i}$ on your homework; it is called a bra, and, techincally speaking, is an element of the dual Hilbert space.}
+Note that knowing the definition of the inner product is enough to know it on any two general vectors.  Indeed, let
+\[ \ket{x} = \sum_{i=0}^{d-1} z_i \ket{i} \]
+and 
+\[ \ket{y} = \sum_{i=0}^{d-1} w_i \ket{i} \]
+be two arbitrary vectors in $\bbC^d$.  Then, because the basis kets are orthogonal, when we expand out the bra-ket $\braket{x}{y}$ using sesquilinearity, the cross terms cancel and we are left with
+\[ \braket{x}{y} = \sum_{i=0}^{d-1} z_i^*w_i.\]
+
+Worth reiterating: every finite dimensional Hilbert space is isomorphic to $\mathbb{C}^d$ for some non-negative integer $d$.
+
+\subsection{Infinite dimensional Hilbert spaces}
+Infinite dimensional Hilbert spaces won't play a very large role in this class; one can also arrange to avoid them in most quantum computing discussion.  However, sometimes this is unnatural.  So,
+I will discuss these only to be sure you have good culture.
+
+Probably the most important example of a Hilbert space (indeed, even more important than a qubit!) is $L^2$-integrable functions on $\mathbb{R}^k$.  That is, we can define an (infinite dimensional) vector space over $\bbC$ by looking at
+\[ L^2(\mathbb{R}^k) := \{f : \mathbb{R}^k\to\mathbb{C}~|~\int_{\mathbb{R}^k}|f(x)|^2 dx < \infty\}/\sim\]
+where $f\sim g$ if $f(x) = g(x)$ for $x$ in a set of full measure.  (Equivalence classes of) functions in $L^2(\mathbb{R}^k)$ are what physicists had in mind when they invented the terminology ``wavefunction," since it's things like these that, for example, describe electrons as ``waves" permeating space; in particular, allowing one to formalize the idea that an electron's ``position" is really a probability distribution over all of space!
+
+The inner product is defined by integration via
+\[\braket{f}{g} := \int_{\mathbb{R}^k}f^*(x)g(x) \ dx.\]
+
+A fun fact is that all ``separable" (roughly, meaning NOT uncountably infinite-dimensional) Hilbert spaces are isomorphic.  In particular, $L^2(\mathbb{R}^k) \cong L^2(\mathbb{R}^l)$ even if $k \ne l$.  In other words, up to isomorphism, there is basically only one (separable) infinite-dimensional Hilbert space.
+
+\subsection{Hilbert space generated by a (finite) set}
+Let $S$ be a finite set.  Exactly as for $\bbC^d$, we can define $\mathbb{C}[S]$ to be the Hilbert space spanned by $S$ with the inner product defined (as above) using $\braket{s}{t} = \delta_{st}$.  In this notation, $\bbC^d = \bbC[\{0,1,2,\dots,d-1\}]$.
+
+What if $S$ is not finite?  Then we can stil eke something out, similar to $L^2$:
+\[ \bbC[S] := \left\{ \sum_{s \in S} z_s \ket{s} : \sum_{s \in S} |z_s|^2 < \infty \right\}.\]
+If $S$ is countably infinite, then $\mathbb{C}[S] \cong \mathbb{C}[\mathbb{N}] := \ell_2$, the Hilbert space of all square-sumable sequences.  Moreover, $\ell_2 \cong L^2(\mathbb{R})$.
+
+
+\section{Pauli operators}
+The {\em Pauli operators} are important examples of linear operators on qubits.
+They are defined as matrices:\footnote{Unless otherwise stated, any time we define an operator on a qudit using a matrix, we assume we are using the standard (ordered) basis $\ket{0}, \dots, \ket{d - 1}$}
+\begin{itemize}
+    \item[] $\sigma_0 = I$
+    \item[] $\sigma_1 = X = \begin{bmatrix}
+        0 & 1\\1 & 0
+    \end{bmatrix}$ (bit swap)
+    \item[] $\sigma_2 = Y = \begin{bmatrix}
+        0 & -i\\i & 0
+    \end{bmatrix}$ (composite error)
+    \item[] $\sigma_3 = Z = \begin{bmatrix}
+        1 & 0\\0 & -1
+    \end{bmatrix}$ (relative phase error)
+\end{itemize}
+
+\paragraph*{Example:} If $\ket{\phi} = a\ket{0} + b\ket{1}$, then $X\ket{\phi} = b\ket{0} + a\ket{1}$.  $Z\ket{\phi} = a\ket{0} - b\ket{1}$.
+
+All the Pauli operators are both Hermitian and unitary.  It's not easy to explain or justify now why they are important.  But they do have some nice formal properties, one of which I can explain now.
+
+\begin{dfn}
+If $\mathcal{H}$ is a finite-dimensional Hilbert space, then let $\mathcal{B}(\mathcal{H})$ be the set of all linear operators on $\mathcal{H}$, that is,
+\[ \mathcal{B}(\calH) := \{ A: \calH \to \calH\}.\]
+\end{dfn}
+
+Let me reiterate that $\mathcal{B}(\calH)$ is \emph{all} operators on $\calH$.  Then $\mathcal{B}(\mathcal{H})$ is a complex vector space with dimension $\dim\mathcal{H}^2$.
+
+Let $\mathcal{B}^{sa}(\calH)$ denote the \emph{subset} of $\mathcal{B}(\calH)$ consisting of all self-adjoint operators.  Note that it really does not make sense to call $\mathcal{B}^{sa}(\calH)$ a subspace of $\mathcal{B}(\calH)$ because it is not closed under scalar multiplication by imaginary numbers.  However, this is essentially the \emph{only} reason that $\mathcal{B}^{sa}(\calH)$ is not a subspace.  In other words, if we only look at \emph{real} linear combinations of elements of $\mathcal{B}^{sa}(\calH)$, then we get a \emph{real} subspace of $\mathcal{B}(\mathcal{H})$, considered as a real vector space.
+
+With this all in mind, one can check very easily that $\{I,X,Y,Z\}$ is a basis of $\mathcal{B}^{sa}(\bbC^2)$.
+
+More is true.  $\mathcal{B}(\calH)$ can be made into a Hilbert space by equipping it with the ``Hilbert-Schmidt inner product" (aka ``trace product"; see Exercise 2.39 in Nielsen and Chuang).  Then $\{I,X,Y,Z\}$ is an orthogonal basis.
+
+\end{document}

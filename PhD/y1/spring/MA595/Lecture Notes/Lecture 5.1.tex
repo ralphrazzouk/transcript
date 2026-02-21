@@ -1,0 +1,224 @@
+\documentclass{article}
+\usepackage{tikz}
+\usetikzlibrary{quantikz}
+\usepackage{mathptmx,fullpage}
+\usepackage{amssymb,amsmath,amsthm}
+\usepackage{framed}
+\usepackage{graphicx}
+\usepackage{braket}
+
+
+
+\newtheorem{thm}{Theorem}
+\newtheorem*{dfn}{Definition}
+\newtheorem{cor}[thm]{Corollary}
+\newtheorem{lem}[thm]{Lemma}
+\newtheorem*{note}{Note}
+\newtheorem*{remark}{Remark}
+
+
+%\newcommand{\ket}[1]{|#1\rangle}
+%\newcommand{\bra}[1]{\langle#1|}
+%\newcommand{\braket}[2]{\langle#1|#2\rangle}
+\newcommand{\norm}[1]{\left\lVert #1 \right\rVert}
+\newcommand{\bbC}{\mathbb{C}}
+\newcommand{\calH}{\mathcal{H}}
+\newcommand{\qbit}{\bbC^2}
+\newcommand{\qbits}[1]{(\qbit)^{\otimes #1}}
+
+\DeclareMathOperator{\poly}{poly}
+
+\begin{document}
+
+    
+
+\noindent
+\fbox{
+	\parbox{\linewidth}{
+		\vspace{-.3cm}
+{\bf \Large \begin{center}
+CS 593/MA 592 - Intro to Quantum Computing \\
+Spring 2024 \\
+Tuesday, February 6 - Lecture 5.1
+\end{center}}
+Today's scribe: Asini 
+	}
+}
+
+\vspace{.3cm}
+
+\noindent {\bf Reading:} Chapter 1 of Nielsen and Chuang. 
+
+\
+
+\noindent{\bf Agenda:}
+\begin{enumerate}
+     \item Quantum Advantage
+     \item Quantum Teleportation
+     \item Deutsch-Jozsa Algorithm
+\end{enumerate}
+
+\section{Quantum Advantage}
+
+$\ket \psi \in \mathcal{H}_1 \otimes \mathcal{H}_2$ is $\mathbf{unentangled}$, or \emph{separable}, if $\ket \psi = \ket \psi_1 \otimes \ket \psi_2 \in \mathcal{H}_1 \otimes \mathcal{H}_2$. Not all states are separable. Non separable states are called \emph{entangled}.
+An \emph{entangling unitary} is a unitary $U: \mathcal{H}_1 \otimes \mathcal{H}_2 \rightarrow \mathcal{H}_1 \otimes \mathcal{H}_2$ that is not of the form $U_1 \otimes U_2$ for some $U_1: \mathcal{H}_1 \to \mathcal{H}_1$ and $U_2: \mathcal{H}_2 \to \mathcal{H}_2$.
+
+If we try to do quantum mechanics only with separable or unentangled things, then we would ``only'' have classical probability at our disposal.  So quantum computing might be understood as ``applied entanglement", i.e., using entaglement as a computational resource.
+
+On the other hand, quantum information theory (in the narrow sense) is the study of quantum entanglement per se i.e., as a thing we want to quantify in various ways. Quantum information theory seeks to measure entanglement via things like``entanglement entropy" and "entanglement monotones."
+
+Quantum advantage (or proofs that there is no quantum advantage for a certain problem) is the main goal of quantum computing theory (in narrow sense). There are two main domains of well characterized quantum advantage.
+
+\begin{itemize}
+    \item Hidden subgroup problems
+    \item Unstructured search (aka Grover's algorithm)
+\end{itemize}
+
+\subsection*{Hidden subgroup problems}
+
+Includes the "quantum part" of Shor's algorithm. Good new is this provides exponential advantage in "query complexity". The bad news is query model is unrealistic (in general).
+
+\subsection*{Unstructured search (aka Grover's algorithm)}
+
+Good news here is we can find a needle in a haystack of size $N$ in time $\sqrt{N}$. Bad news is this can't do better than $\sqrt{N}$. Worse error in quantum overhead might negate any advantage!
+
+\subsection*{Other domains}
+Other frameworks for potential quantum advantage exist but their potential advantage tends to be poorly characterized (by the standards of CS theory, that is):
+\begin{enumerate}
+    \item HHL algorithm for matrix inversion, i.e., solving $A\vec X = B$ where A is sparse.
+    \item Quantum optimization/ VQE/ Quantum annealing/ Adiabatic quantum computing. (Use quantum annealing to find minima of energy landscapes)
+\end{enumerate}
+
+Also important, but for somewhat different reasons:
+\begin{itemize}
+    \item Quantum simulation
+    \item Quantum random walks/Monte Carlo
+\end{itemize}
+
+Quantum advantage is also something that can be explored in information theoretic sense (rather than the computational/algorthmic sense). Examples are
+\begin{itemize}
+    \item Bell inequalities
+    \item Entanglement games
+\end{itemize}
+
+\section{Quantum Teleportation}
+
+Define the four \emph{Bell States} (aka \emph{EPR pairs}) on a pair of qubits as follows:
+\begin{itemize}
+    \item $\ket {\beta_{00}} = \ket{00} + \ket{11}$
+    \item $\ket {\beta_{01}} = \ket{01} + \ket{10}$
+    \item $\ket {\beta_{10}} = \ket{00} - \ket{11}$
+    \item $\ket {\beta_{11}} = \ket{01} - \ket{10}$
+\end{itemize}
+Theses states come from applying the following circuit to the computational basis:
+
+\[\begin{quantikz}[thin lines] 
+        \lstick{$\ket{x}$} & \gate{H} &  \ctrl{1}   &  \qw \\
+        \lstick{$\ket{y}$} & \qw & \targ{}  & \qw    
+\end{quantikz}\]
+
+We will now use Bell pairs to do ``quantum teleportation."
+
+\paragraph{Claim:} To build a quantum network it suffices to have a classical network and some ``tubes" that can move individual qubits in Bell states around.\
+
+\
+
+We imagine a scenario where we have three parties: Alice and Bob (who both have quantum computers at home), and also a ``Quantum Internet Service Provider" (QISP) who owns the pipes that can be used to move the qubits in Bell pairs around, in particular, sending some to Alice and others to Bob.  (We also suppose there is a classical ISP around.)
+
+Suppose Alice wants to send the state $\ket{\psi} = \alpha\ket{0} + \beta\ket{1}$ to Bob.  Critically, we don't want to assume Alice knows the values of $\alpha$ or $\beta$ (since in that case, she could just call Bob on the phone and tell him, although the phone call might be pretty long depending on how many bits of precision she whats to share).  Rather, we want Alice to be able to send $\ket{\psi}$ to Bob simply by sending two bits of \emph{classical} information.  Bob  We obtain following result from the circuit.  Critically, for this to succeed, we need Alice and Bob to each possess one half of a Bell pair, which is where the QISP comes in.
+
+Consider the following circuit.
+
+\[
+\includegraphics[width=0.5\textwidth]{tele.jpg}
+\]
+
+This is called the teleportation protocol.  Note that the dashed lines indicate that Alice is sending Bob \emph{classical} information (e.g. over the good ole' classical internet).  The thing to check is that Bob really is left with the state $\ket{\psi}$ at the end.  This is a relatively simple exercise in algebra, using the following two identities: 
+
+\begin{equation*}
+\begin{split}
+CNOT_{1,2}(\ket{\psi}\ket{\beta_{00}}) &=  CNOT{1,2}(\alpha\ket{0} + \beta\ket{1}) \otimes (\ket{00} + \ket{11})\\
+&= CNOT_{1,2}(\alpha\ket{000} + \alpha\ket{011} + \beta\ket{100} + \beta\ket{111} )\\
+&= \alpha\ket{000} + \alpha\ket{011} + \beta\ket{110} + \beta\ket{101}\\
+&= \alpha\ket{0} \otimes (\ket{00} + \ket{11}) + \beta\ket{1} \otimes (\ket{10} + \ket{01})\\
+H(\alpha\ket{0} \otimes (\ket{00} + \ket{11}) + \beta\ket{1} \otimes (\ket{10} + \ket{01})) &= \alpha\ket{+} \otimes (\ket{00} + \ket{11}) + \beta\ket{-} \otimes (\ket{10} + \ket{01})\\
+&= \ket{00} \otimes (\alpha\ket{0} + \beta\ket{1}) + \ket{01} \otimes (\alpha\ket{1} + \beta\ket{0})\\ 
+& + \ket{10} \otimes (\alpha\ket{0} - \beta\ket{1}) + \ket{11} \otimes (\alpha\ket{1} - \beta\ket{0})
+\end{split}
+\end{equation*}
+
+\section{Deutschâ€“Jozsa Algorithm}
+We will now give another example of the weird power of entanglement called the Deutsch-Jozsa algorithm.  It is one of the simpler examples of a class of problems called the \emph{hidden subgroup problem}.  (Shor's factoring algorithm is another example of a hidden subgroup problem algorithm, modulo some classical reductions...)
+
+Suppose we're given a boolean function $F:\{0,1\}^n \rightarrow \{0,1\}$ which is \emph{promised} to satisfy one of the following two properties:
+\begin{enumerate}
+    \item $F$ is constant
+    \item $F$ is balanced, meaning number of elements in $\{F^{-1}(0)\}$ = number of elements in $\{F^{-1}(1)\}$ 
+\end{enumerate}
+Our task is to decide which of the two properties $F$ has.  This is called the Deutsch-Jozsa problem.
+
+Before solving this problem using quantum mechanics, let me cop to something: it is \emph{highly} contrived.  You are almost surely never going to encouter a function $F$ in ``the real world" that is constant or balanced, but you just don't know of the two is the case.  Nevertheless, if we have \emph{quantum} access to such a highly contrived $F$, then we can decide whether it is constant or balance more quickly than \emph{any} classical (deterministic) algorithm.  This is surely remarkable and interesting, even if it isn't immediately useful.
+
+So, we must decide which of the two conditions F satisfies. How hard is it to do? With a classical deterministic algorithm, we need at least $2^{n-1} +1$ calls to $F$ to decide.  That is,the best we can do is check the value of $F$ on half of its input, plus one.  Note that if $F$ is not constant, if we're lucky, we'll see this before having to check so many inputs.  But, critically, if we want to be \emph{certain} that $F$ is NOT constant, then, determinastically, the best we can do is check half plus one of its inputs.
+
+The Deutsch-Jozsa algorithm shows that on a quantum computer with "Quantum oracle access to $F$", only one call to the oracle is enough to decide with certainty whether $F$ is constant or balanced!
+
+How does this work?  First of all, we need \emph{quantum} oracle access to $F$, which we will assume we have via the ``unitary dilation," as we have discussed before:
+
+\begin{align*}
+U_F\colon & (\mathbb{C}^2)^{\otimes n} \otimes \mathbb{C}^2  \rightarrow (\mathbb{C}^2)^{\otimes n} \otimes \mathbb{C}^2\\
+& \ket{b,y}  \mapsto \ket{b,f(b) \oplus y}
+\end{align*}
+
+\paragraph{Claim:} With only one call to the black box unitary $U_F$ we can determine if $F$ is balanced or constant with certainty.\\
+
+The algorithm is summed up by the following circuit:
+\[
+\includegraphics[width=0.4\textwidth]{Deu.jpg}
+\]
+
+I claim that after measuring the output in the above circuit as indicated, we either see $0\cdots0$ with probability 1 (in which case $F$ is constant) or we do not see $\ket{0\cdots0}$ with any probability (in which case $F$ is balanced).  Indeed, this follows from a fairly elementary calculation.
+
+Write
+\[\ket{\psi_1} &= \sum_x\ket{x} \otimes \ket{-}.\]
+Then applying $U_F$ to this state we get
+\[
+    U_F\ket{\psi_1} &= \sum_x\ket{x} (\ket{0 \oplus F(x)} - \ket{1 \oplus F(x)})
+    &= \sum_x (-1)^{F(x)}\ket{x} \otimes \ket{-}\\
+\]
+Now apply the last round of Hadamards:
+\[
+    H^{\otimes n} \otimes id (\sum_x (-1)^{F(x)}\ket{x} \otimes \ket{-}) &= \sum_{x,z} \frac{(-1)^{x\cdot z + F(x)}}{2^n} \ket{z}\oplus\ket{-}
+\]
+Notice that in the exponent of $(-1)$ here, we're taking the mod 2 dot product $x \cdot z$ and then adding $F(x)$ to it (mod 2). 
+
+Finally, let's compute the amplitude of $\ket{0\cdots0}\otimes\ket{-}$ on our output state:
+\begin{equation*}
+    \sum_x \frac{(-1)^{x\cdot0 + F(x)}}{2^n} =
+    \begin{cases}
+      (-1)^{F(x)} & \text{if $F(x)$ is constant}\\
+      0 & \text{if $F(x)$ is balanced}
+      %0 & \text{otherwise}
+    \end{cases}
+\end{equation*}
+Staring hard and thinking about what this means if we measure in teh computational basis, we come to the following conclusion: if we measure the first $n$ bits of the output of the above circuit, then the probability that we see all 0's is 1 if $F$ is constant, and $0$ if $F$ is balanced.  In other words, after measuring the output of the above circuit, if we see all zeroes, then we can be certain that $F$ is constant, and if we do not see all zeroes, then we can be certain that $F$ is balanced.  Thus, we only had to query $U_F$ once to decide if $F$ is constant or balanced.  Wild stuff!
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\end{document}
